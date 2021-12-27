@@ -1,0 +1,19 @@
+\BOOKMARK [1][-]{section.1}{Introduction}{}% 1
+\BOOKMARK [2][-]{subsection.1.1}{Main results}{section.1}% 2
+\BOOKMARK [1][-]{section.2}{Solar algorithm }{}% 3
+\BOOKMARK [2][-]{subsection.2.1}{Solar solved by least angle regression}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.2}{Solar solved by coordinate descent}{section.2}% 5
+\BOOKMARK [1][-]{section.3}{Solar comparison and improvements over lasso variants, lasso rules and variable screening }{}% 6
+\BOOKMARK [2][-]{subsection.3.1}{comparison and generaliztion to all lasso variants}{section.3}% 7
+\BOOKMARK [2][-]{subsection.3.2}{Solar advantages on post-selection hypothesis testing}{section.3}% 8
+\BOOKMARK [2][-]{subsection.3.3}{Solar advantages over lasso rules and variable screening under complicated dependence structure}{section.3}% 9
+\BOOKMARK [2][-]{subsection.3.4}{Solar robustness to different settings of the IRC }{section.3}% 10
+\BOOKMARK [1][-]{section.4}{Solar improvements over lasso-related, subsampling variable selection algorithms}{}% 11
+\BOOKMARK [2][-]{subsection.4.1}{Simulation competitors}{section.4}% 12
+\BOOKMARK [2][-]{subsection.4.2}{Simulation settings}{section.4}% 13
+\BOOKMARK [2][-]{subsection.4.3}{Programming language, platforms and hardware for simulations}{section.4}% 14
+\BOOKMARK [2][-]{subsection.4.4}{Accuracy and sparsity comparison with varying p/n }{section.4}% 15
+\BOOKMARK [2][-]{subsection.4.5}{Explanation to the bolasso-bsolar efficiency discrepency}{section.4}% 16
+\BOOKMARK [2][-]{subsection.4.6}{Computation load comparison }{section.4}% 17
+\BOOKMARK [1][-]{section.5}{Real-world data: Sydney house price prediction}{}% 18
+\BOOKMARK [1][-]{section.6}{Conclusion}{}% 19

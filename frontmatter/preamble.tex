@@ -1,0 +1,47 @@
+\RequirePackage{amsthm,amsmath,amsfonts,amssymb}
+\RequirePackage{natbib}
+\RequirePackage[colorlinks,linkcolor=cyan,citecolor=red,urlcolor=magenta]{hyperref}
+\RequirePackage{fix-cm}
+
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{arydshln}
+\usepackage{color,soul}
+\usepackage{accents,float,graphicx,subfig,multirow,dcolumn,booktabs,lscape}
+\usepackage{comment}
+\usepackage[letterpaper,margin=0.9in]{geometry}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+%\usepackage{pbox}
+
+\newcommand{\size}[2]{{\fontsize{#1}{0}\selectfont#2}}
+\newenvironment{sizepar}[2]
+ {\par\fontsize{#1}{#2}\selectfont}
+ {\par}
+
+
+ 
+\SetAlFnt{\small}
+
+\pagestyle{myheadings}
+
+\numberwithin{equation}{section}
+
+\theoremstyle{definition}
+\newtheorem{definition}{\protect\definitionname}
+\providecommand{\definitionname}{Definition}
+\numberwithin{definition}{section}
+
+\newcommand{\ind}{\perp\!\!\!\!\perp}
+\newcommand{\ts}{\rlap{$^{***}$}}
+\newcommand{\ds}{\rlap{$^{**}$}}
+\newcommand{\s}{\rlap{$^{*}$}}
+
+\def\spacingset#1{\renewcommand{\baselinestretch}{#1}\small\normalsize}\spacingset{1}
+
+\newcolumntype{.}{D{.}{.}{-1}}
+
+% path for figures
+\graphicspath{{figures/}}
+
+% Remove irritating PDFLaTeX warnings
+\pdfminorversion=6
+\pdfsuppresswarningpagegroup=1
