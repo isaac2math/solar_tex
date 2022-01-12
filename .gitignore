@@ -1,4 +1,8 @@
-/ppt/*
+/ppt
+/figures
+**/.DS_Store
+/TeXAux/old_version.tex
 *.sh
-desktop.ini
 revision_summary.txt
+.DS_Store
+

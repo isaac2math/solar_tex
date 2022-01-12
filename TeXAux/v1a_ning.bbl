@@ -1,4 +1,4 @@
-\begin{thebibliography}{33}
+\begin{thebibliography}{34}
 \expandafter\ifx\csname natexlab\endcsname\relax\def\natexlab#1{#1}\fi
 \providecommand{\url}[1]{\texttt{#1}}
 \providecommand{\href}[2]{#2}
@@ -104,6 +104,17 @@
 \newblock \bibinfo{title}{Safe feature elimination for the lasso and sparse
   supervised learning problems}.
 \newblock \bibinfo{journal}{arXiv preprint arXiv:1009.4219} .
+%Type = Article
+\bibitem[{Guo et~al.(2015)Guo, Zeng, Hu, Zhang, Zhu, Deng and
+  Hao}]{guo2015improved}
+\bibinfo{author}{Guo, P.}, \bibinfo{author}{Zeng, F.}, \bibinfo{author}{Hu,
+  X.}, \bibinfo{author}{Zhang, D.}, \bibinfo{author}{Zhu, S.},
+  \bibinfo{author}{Deng, Y.}, \bibinfo{author}{Hao, Y.}, \bibinfo{year}{2015}.
+\newblock \bibinfo{title}{Improved variable selection algorithm using a
+  lasso-type penalty, with an application to assessing hepatitis b infection
+  relevant factors in community residents}.
+\newblock \bibinfo{journal}{PLoS One} \bibinfo{volume}{10},
+  \bibinfo{pages}{e0134151}.
 %Type = Article
 \bibitem[{Hall and Miller(2009)}]{hall2009using}
 \bibinfo{author}{Hall, P.}, \bibinfo{author}{Miller, H.}, \bibinfo{year}{2009}.
