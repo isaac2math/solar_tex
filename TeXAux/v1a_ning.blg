@@ -6,42 +6,42 @@ Database file #1: ref/CVrefs.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
 You've used 34 entries,
             2990 wiz_defined-function locations,
-            836 strings with 10760 characters,
-and the built_in function-call counts, 23929 in all, are:
-= -- 1820
-> -- 964
-< -- 18
-+ -- 381
-- -- 336
-* -- 2663
-:= -- 3458
+            832 strings with 10722 characters,
+and the built_in function-call counts, 23789 in all, are:
+= -- 1808
+> -- 956
+< -- 19
++ -- 378
+- -- 333
+* -- 2638
+:= -- 3438
 add.period$ -- 100
 call.type$ -- 34
-change.case$ -- 277
+change.case$ -- 275
 chr.to.int$ -- 33
 cite$ -- 34
-duplicate$ -- 1753
-empty$ -- 1747
-format.name$ -- 448
-if$ -- 4427
+duplicate$ -- 1745
+empty$ -- 1743
+format.name$ -- 447
+if$ -- 4405
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 346
+missing$ -- 344
 newline$ -- 183
 num.names$ -- 136
-pop$ -- 618
+pop$ -- 622
 preamble$ -- 1
-purify$ -- 244
+purify$ -- 243
 quote$ -- 0
-skip$ -- 483
+skip$ -- 485
 stack$ -- 0
-substring$ -- 1174
-swap$ -- 1295
+substring$ -- 1156
+swap$ -- 1282
 text.length$ -- 3
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 303
+type$ -- 300
 warning$ -- 0
-while$ -- 161
+while$ -- 160
 width$ -- 0
-write$ -- 486
+write$ -- 485

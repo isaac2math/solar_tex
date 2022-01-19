@@ -41,14 +41,6 @@
 \newblock \bibinfo{journal}{Journal of Machine Learning Research}
   \bibinfo{volume}{2}, \bibinfo{pages}{499--526}.
 %Type = Article
-\bibitem[{DiCiccio et~al.(2020)DiCiccio, DiCiccio and
-  Romano}]{diciccio2020exact}
-\bibinfo{author}{DiCiccio, C.J.}, \bibinfo{author}{DiCiccio, T.J.},
-  \bibinfo{author}{Romano, J.P.}, \bibinfo{year}{2020}.
-\newblock \bibinfo{title}{Exact tests via multiple data splitting}.
-\newblock \bibinfo{journal}{Statistics \& Probability Letters}
-  \bibinfo{volume}{166}, \bibinfo{pages}{108865}.
-%Type = Article
 \bibitem[{Donoho(2017)}]{donoho201750}
 \bibinfo{author}{Donoho, D.}, \bibinfo{year}{2017}.
 \newblock \bibinfo{title}{50 years of data science}.
@@ -203,6 +195,12 @@
 \newblock \bibinfo{title}{Scikit-learn: Machine learning in {P}ython}.
 \newblock \bibinfo{journal}{Journal of Machine Learning Research}
   \bibinfo{volume}{12}, \bibinfo{pages}{2825--2830}.
+%Type = Book
+\bibitem[{Romano and DiCiccio(2019)}]{diciccio2020exact}
+\bibinfo{author}{Romano, J.P.}, \bibinfo{author}{DiCiccio, C.},
+  \bibinfo{year}{2019}.
+\newblock \bibinfo{title}{Multiple data splitting for testing}.
+\newblock \bibinfo{publisher}{Department of Statistics, Stanford University}.
 %Type = Article
 \bibitem[{Taylor et~al.(2014)Taylor, Lockhart, Tibshirani and
   Tibshirani}]{taylor2014exact}
