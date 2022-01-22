@@ -1,4 +1,4 @@
-\documentclass[11pt,authoryear]{elsarticle}
+\documentclass[11pt,review,authoryear]{elsarticle}
 \input{frontmatter/preamble}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -7,8 +7,7 @@
 
 \begin{document}
 
-\title{Solar: stable and ultrafast variable selection for high dimensional and large-scale data\tnoteref{tstar}}
-\tnotetext[tstar]{The authors would like to thank . . . .}
+\title{Solar: stable and ultrafast variable selection for high dimensional and large-scale data}
 
 \author{Ning Xu\corref{cor1}}
 \ead{n.xu@sydney.edu.au}
@@ -18,17 +17,22 @@
 \ead{tim.fisher@sydney.edu.au}
 \address{School of Economics, University of Sydney, Australia}
 
+\author{Jian Hong}
+\ead{jian.hong@sydney.edu.au}
+\address{School of Economics, University of Sydney, Australia}
+
+
 \cortext[cor1]{Principal corresponding author.}
 \cortext[cor2]{Corresponding author.}
 
 \begin{abstract}
   %
-  We propose a new algorithm for variable selection in high-dimensional, large-scale data, called \emph{subsample-ordered least-angle regression (solar)} and a coordinate-descent generalization \emph{(solar-cd)}. By averaging and re-ordering lasso paths using the $L_0$ norm, solar can easily be modified to replace many lasso variants. Solar alleviates several high-dimensional issues with lasso, such as the strong/safe rules, variable screening, and subsampling variable selection. Using examples, simulations, and real-world data, we illustrate: (i) with the same computation load, solar yields substantial improvements over lasso in terms of the sparsity (37-64\% reduction in false variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso strong/safe rule and variable screening, solar largely rectifies incorrect variable purging and sparsity loss with complicated dependence structures and harsh settings of the irrepresentable condition; (iii) solar supplemented with the hold-out average test (an adaptation of data-splitting hypothesis testing) dramatically improves the efficiency and accuracy of post-selection inference; (iv) replacing lasso with solar in subsampling variable selection (e.g., the bootstrap lasso or stability selection) produces a novel \emph{multi-layer} variable ranking scheme, resulting in improvements in selection sparsity, ranking accuracy, and huge computation load reductions (a saving of at least 96\% in runtime, substantially beyond the theoretical maximum speedup for parallelizing any lasso-type algorithm.) Using a Python interface and an Intel MKL Fortran/C++ compiler, we provide a parallel computing package for solar (\texttt{solarpy}) in the supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
+  We propose a new algorithm for variable selection in high-dimensional, large-scale data, called \emph{subsample-ordered least-angle regression (solar)} and a coordinate-descent generalization \emph{(solar-cd)}. By averaging and re-ordering lasso paths using the $L_0$ norm, solar can easily be modified to replace many lasso variants. Solar alleviates several high-dimensional issues with lasso, such as the strong/safe rules, variable screening, and subsampling variable selection. Using examples, simulations, and real-world data, we illustrate: (i) with the same computation load, solar yields substantial improvements over lasso in terms of the sparsity (37-64\% reduction in false variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso strong/safe rule and variable screening, solar largely rectifies incorrect variable purging and sparsity loss with complicated dependence structures and harsh settings of the irrepresentable condition; (iii) solar supplemented with the hold-out average test (an adaptation of data-splitting hypothesis testing) dramatically improves the efficiency and accuracy of post-selection inference; (iv) replacing lasso with solar in subsampling variable selection (e.g., the bootstrap lasso or stability selection) produces a novel \emph{multi-layer} variable ranking scheme, resulting in improvements in selection sparsity, ranking accuracy, and huge computation load reductions (a saving of at least 96\% in runtime, substantially beyond the theoretical maximum speedup for parallelizing the lasso-type algorithm.) Using a Python interface and an Intel MKL Fortran/C++ compiler, we provide a parallel computing package for solar (\texttt{solarpy}) in the supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
   %
 \end{abstract}
 
 \begin{keyword}
-Sparsity, complicated dependence structure, irrepresentable condition, lasso, bolasso, subsampling variable selection, variable screening.
+Sparsity, complicated dependence structure, irrepresentable condition, lasso rule, bolasso, subsampling variable selection, variable screening.
 \end{keyword}
 
 \maketitle
@@ -43,7 +47,7 @@ Sparsity, complicated dependence structure, irrepresentable condition, lasso, bo
 
 \section{Introduction}
 
-In the last decade, lasso-related algorithms have been widely applied to high dimensional, large-scale applications \citep{efronall04, friedman2007pathwise, friedman2010regularization}. Various improvements have been proposed for lasso to address known issues of computation speed, selection sparsity, stability, and accuracy \citep{weisberg04, lim2016estimation}. Subsampling variable selection (e.g., \citet{bach2008bolasso, meinshausen2010stability}) has emerged as one of the most effective improvements to the variable-selection accuracy and stability of lasso. Given that optimization of the lasso-type tuning parameter is often combined with cross validation (CV), computing CV-lasso on each bootstrap subsample sharply increases the computation load, making any subsampling-based lasso variants less attractive in large-scale applications such as computer vision and natural language processing (where $p$ may be in the millions and data in the TBs) \citep{xu2012asymptotic}. Thus, in a world of ever-expanding data dimensionality, it is critical that improvements in variable selection are accompanied with significant computation load reductions.
+In the last decade, lasso-related algorithms have been widely applied to high dimensional, large-scale applications \citep{efronall04, friedman2007pathwise, friedman2010regularization}. Various improvements have been proposed for lasso to address known issues of computation speed, selection sparsity, stability, and accuracy \citep{weisberg04, lim2016estimation}. Subsampling variable selection (e.g., \citet{bach2008bolasso, meinshausen2010stability}) has emerged as one of the most effective improvements to the variable-selection accuracy and stability of lasso. Given that optimization of the lasso-type tuning parameter is often combined with cross validation (CV), computing CV-lasso on each bootstrap subsample sharply increases the computation load, making any subsampling-based lasso variants less attractive in large-scale applications such as computer vision and natural language processing (where $p$ may be in the millions and data in the GBs) \citep{xu2012asymptotic}. Thus, in a world of ever-expanding data dimensionality, it is critical that improvements in variable selection are accompanied with significant computation load reductions.
 
 Post-lasso selection rules (e.g., the `safe rule' \citep{ghaoui2010safe} and the `strong rule' \citep{tibshirani2012strong}) are capable of improving lasso without exponentially increasing the computation runtime. However, the rules may falsely purge informative variables or propose repeated modifications \citep{wang2014safe, zeng2017efficient}. Alternatively, \citet{wasserman2009high}, \citet{meinshausen2009p} and \citet{barber2019knockoff} propose data splitting to conduct classical hypothesis tests after subsample selection. The original data are split into two: one part for variable selection, the other for testing. However, to improve test power, data-splitting must be repeated on each bootstrap sample, raising similar computational concerns as subsampling variable selection \citep{bach2008bolasso,meinshausen2010stability}. \citet{diciccio2020exact} also conclude that because data splitting reserves a portion of the data for variable selection, it reduces the degrees of freedom for testing on the remaining data, which may be a problem when the original sample size is limited. Lastly, \citet{fan2008sure} propose the variable screening algorithm, which ranks the absolute values of unconditional correlations between each covariate and the response variable, selecting only the top-ranked variables. However, \citet{fan2008sure} and \citet{barut2016conditional} (and Section~\ref{section:example} below) show that variable screening methods also suffer from invalid variable selection and purging when the dependence structure is complicated.
 
@@ -51,7 +55,7 @@ Post-lasso selection rules (e.g., the `safe rule' \citep{ghaoui2010safe} and the
 
 To address these issues, we propose a new algorithm for variable selection in high-dimensional, large-scale data, called \emph{subsample-ordered least-angle regression} (\emph{solar}), and a coordinate-descent generalization (\emph{solar-cd}). Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easily adaptable to many lasso variants. Solar alleviates the high-dimensional issues with lasso, such as the strong/safe rules, variable screening, and subsampling variable selection while having the same computation load as lasso.
 
-Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) with the same computation load, solar yields substantial improvements over lasso in terms of the sparsity (37-64\% reduction in false variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso strong/safe rule and variable screening, solar largely rectifies incorrect variable purging and sparsity loss in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) solar supplemented with the hold-out average test (an adaptation of data-splitting hypothesis testing) substantially improves the efficiency and accuracy of post-selection inference; (iv) replacing lasso with solar in subsampling variable selection (e.g., the bootstrap lasso or stability selection) produces a novel \emph{multi-layer} variable ranking scheme that brings improvements in selection sparsity, ranking accuracy, and computation resources (a saving of at least 96\% in runtime, substantially beyond the theoretical maximum speedup for parallelizing any lasso-type algorithm.). Using a Python interface and an Intel MKL Fortran/C++ compiler, we provide a parallel computing package for solar (solarpy) in the supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
+Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) with the same computation load, solar yields substantial improvements over lasso in terms of the sparsity (37-64\% reduction in false variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso strong/safe rule and variable screening, solar largely rectifies incorrect variable purging and sparsity loss in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) solar supplemented with the hold-out average test (an adaptation of data-splitting hypothesis testing) substantially improves the efficiency and accuracy of post-selection inference; (iv) replacing lasso with solar in subsampling variable selection (e.g., the bootstrap lasso or stability selection) produces a novel \emph{multi-layer} variable ranking scheme that brings improvements in selection sparsity, ranking accuracy, and computation resources (a saving of at least 96\% in runtime, substantially beyond the theoretical maximum speedup for parallelizing the lasso-type algorithm.). Using a Python interface and an Intel MKL Fortran/C++ compiler, we provide a parallel computing package for solar (solarpy) in the supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
 
 The paper is organized as follows. In section~\ref{section:algo}, we introduce solar and its coordinate descent generalization. In section~\ref{section:adv} and \ref{section:comp}, we  use examples and simulations to demonstrate solar's improvements over lasso, the strong/safe rules, variable screening, forward regression and the lasso-related, subsampling variable selection. In section~\ref{section:application}, we use real-world data that exhibits complicated dependency structures to show that the improvements from solar are feasible, while lasso and elastic net lose sparsity.
 
@@ -65,7 +69,7 @@ The solar improvements over lasso and lasso-related subsampling variable selecti
 %
 \begin{definition}[$L_0$ solution path]
   %
-  Define the \textbf{$L_0$ solution path} on $\left( Y, X \right)$ to be the order that forward regression includes variables across all stages. For example, if the least angle regression includes $\mathbf{x}_3$ at stage 1, $\mathbf{x}_2$ at stage 2 and $\mathbf{x}_1$ at stage 3, the corresponding $L_0$ path is the ordered set $\left\{ \left\{\mathbf{x}_3 \right\}, \left\{ \mathbf{x}_3, \mathbf{x}_2 \right\}, \left\{ \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1 \right\} \right\}$.
+  Define the \textbf{$L_0$ solution path} on $\left( Y, X \right)$ to be the order that least-angle regression includes variables across all stages. For example, if the least angle regression includes $\mathbf{x}_3$ at stage 1, $\mathbf{x}_2$ at stage 2 and $\mathbf{x}_1$ at stage 3, the corresponding $L_0$ path is the ordered set $\left\{ \left\{\mathbf{x}_3 \right\}, \left\{ \mathbf{x}_3, \mathbf{x}_2 \right\}, \left\{ \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1 \right\} \right\}$.
   %
   \label{def:solution_path}
   %
@@ -127,7 +131,7 @@ After subsampling, the second part of Algorithm~\ref{algo:APE-lar} (lines~\ref{i
 %
 \begin{definition}[average $L_0$ solution path]
   %
-  Define the \textbf{average $L_0$ solution path} of forward regression on $\left\{ \left( Y^k, X^k \right) \right\}_{k=1}^{K}$ to be the decreasing rank order of variables based on their corresponding $\widehat{q}_i$ values. For example, in Figure~\ref{fig:q_demo}, the $\widehat{q}_i$ values for $\mathbf{x}_1$, $\mathbf{x}_2$ and $\mathbf{x}_3$ are, respectively, $\widehat{q}_1 = 5/6$, $\widehat{q}_2 = 4/6$ and $\widehat{q}_3 = 3/6$. As a result, the average $L_0$ solution path can be represented as an ordered set $\left\{ \left\{ \mathbf{x}_1 \right\}, \left\{ \mathbf{x}_1, \mathbf{x}_2 \right\}, \left\{ \mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3 \right\} \right\}$.
+  Define the \textbf{average $L_0$ solution path} of least-angle regression on $\left\{ \left( Y^k, X^k \right) \right\}_{k=1}^{K}$ to be the decreasing rank order of variables based on their corresponding $\widehat{q}_i$ values. For example, in Figure~\ref{fig:q_demo}, the $\widehat{q}_i$ values for $\mathbf{x}_1$, $\mathbf{x}_2$ and $\mathbf{x}_3$ are, respectively, $\widehat{q}_1 = 5/6$, $\widehat{q}_2 = 4/6$ and $\widehat{q}_3 = 3/6$. As a result, the average $L_0$ solution path can be represented as an ordered set $\left\{ \left\{ \mathbf{x}_1 \right\}, \left\{ \mathbf{x}_1, \mathbf{x}_2 \right\}, \left\{ \mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3 \right\} \right\}$.
   %
   \label{def:L_0_solution_path}
   %
@@ -255,11 +259,17 @@ Most importantly, because they use the same optimization methods, many lasso enh
 
 \subsection{Solar advantages on post-selection hypothesis testing}
 
-Solar is amenable to post-selection testing. Because the lasso tests \citep{lockhartall14, taylor2014exact} are based on least-angle regression, they may be adapted to solar. More interestingly, it is straightforward to adapt the data-splitting tests \citep{wasserman2009high,meinshausen2009p} to solar. We illustrate this point using Example~1.
+\hl{As we shall see in Section~}\ref{section:comp}, \hl{solar exhibites a substantial superiority over lasso-type algorithms in terms of selection sparsity, accuracy and efficiency. In addition,} solar is amenable to post-selection testing. Because the lasso tests \citep{lockhartall14, taylor2014exact} are based on least-angle regression, they may be adapted to solar. More interestingly, it is straightforward to adapt the data-splitting tests \citep{wasserman2009high,meinshausen2009p} to solar \hl{for a further performance boost}. We illustrate this point using Example~1.
 
 \smallskip
 \noindent
-\textbf{Example 1.} Suppose $Y = 2 \mathbf{x}_0 + 3 \mathbf{x}_1 + 4 \mathbf{x}_2 + 5 \mathbf{x}_3 + 6 \mathbf{x}_4  + e$, where all $\mathbf{x}_i$ and $e$ are standard Gaussian with pairwise correlations of $0.5$. Post-selection tests are typically applied with sufficiently large $n$, so $p/n=50/100$. In this setting, forward regression (FR) selects $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0, \mathbf{x}_{45}, \mathbf{x}_{8}, \mathbf{x}_{40}, \mathbf{x}_{6}, \mathbf{x}_{39}, \mathbf{x}_{11}, \mathbf{x}_{34}, \mathbf{x}_{5} \right]$ using BIC score minimization. By contrast, solar selects only $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0, \mathbf{x}_{45}, \mathbf{x}_{40} \right]$. We then conduct post-FR and post-solar t-tests and compare the results to the OLS regression of $Y$ on the $\mathbf{x}_i$.
+\textbf{Example 1.} Suppose the DGP is
+%
+\begin{equation}
+  Y = 2 \mathbf{x}_0 + 3 \mathbf{x}_1 + 4 \mathbf{x}_2 + 5 \mathbf{x}_3 + 6 \mathbf{x}_4 + \sum_{j=5}^{p} 0 \cdot \mathbf{x}_j + e, 
+\end{equation}
+%
+\hl{where all $\mathbf{x}_i$ are standard Gaussian with pairwise correlations of $0.5$ and $e$ is a standard Gaussian noise.} Post-selection tests are typically applied with sufficiently large $n$, so $p/n=50/100$. In this setting, forward regression (FR) selects $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0, \mathbf{x}_{45}, \mathbf{x}_{8}, \mathbf{x}_{40}, \mathbf{x}_{6}, \mathbf{x}_{39}, \mathbf{x}_{11}, \mathbf{x}_{34}, \mathbf{x}_{5} \right]$ using BIC score minimization. By contrast, solar selects only $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0, \mathbf{x}_{45}, \mathbf{x}_{40} \right]$. We then conduct post-FR and post-solar t-tests and compare the results to the OLS regression of $Y$ on the $\mathbf{x}_i$.
 
 After standardizing the $\mathbf{x}_i$ and $\mathbf{Y}$, the sample regression coefficient is identical to the corresponding conditional correlation. Both the t-test results and FR selection decisions are largely based on the sample regression coefficient absolute values; keeping variables with large values and purging the rest. Hence, the variables selected by FR also have low p-values on the current sample, implying that direct, post-FR t-tests overfit the sampling randomness that also affects the variable selection algorithm (referred to as `p-value overfitting'). The main problem here is that there is no sample change between the FR sample and the post-FR test sample.
 
@@ -275,7 +285,7 @@ To solve this issue, we improve the data-splitting tests by merging the \citet{b
   %
 \end{itemize}
 
-As shown in Table~\ref{table:post-selection-test}, the hold-out average t-values for $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0\right]$ are very similar to their OLS counterparts while the hold-out average t-values for $\left[\mathbf{x}_{40}, \mathbf{x}_{45} \right]$ are lower, which leads to purging $\mathbf{x}_{40}$ and $\mathbf{x}_{45}$. We repeat the simulation 200 times and the results, summarized in Figure~\ref{fig:t_value_compare}, confirm that improvements in the hold-out average are not simply due to chance. It is important to note that OLS uses all of the sample and has $50$ residual degrees of freedom whereas the hold-out average uses only 50\% of the sample in each round and consequently has $30$-$40$ degrees of freedom. Thus, the hold-out average naturally produces slightly lower t-values for $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0\right]$ and the t-value boxplots for the hold-out average are slightly less concentrated than the OLS boxplots. Simulations in Section~\ref{subsection:suml1}, show that solar supplemented with the hold-out average purges almost all of the redundant variables while retaining all of the informative variables.
+As shown in Table~\ref{table:post-selection-test}, the hold-out average t-values for $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0\right]$ are very similar to their OLS counterparts while the hold-out average t-values for $\left[\mathbf{x}_{40}, \mathbf{x}_{45} \right]$ are lower, which leads to purging $\mathbf{x}_{40}$ and $\mathbf{x}_{45}$. We repeat the simulation 200 times and the results, summarized in Figure~\ref{fig:t_value_compare}, confirm that improvements in the hold-out average are not simply due to chance. It is important to note that OLS uses all of the sample and has $50$ residual degrees of freedom whereas the hold-out average uses only 50\% of the sample in each round and consequently has $30$-$40$ degrees of freedom. Thus, the hold-out average naturally produces slightly lower t-values for $\left[\mathbf{x}_4, \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1, \mathbf{x}_0\right]$ and the t-value boxplots for the hold-out average are slightly less concentrated than the OLS boxplots. Simulations in Section~\ref{subsection:suml1}, show that solar supplemented with the hold-out average purges almost all of the redundant variables while retaining all of the informative variables. $\blacksquare$
 
 %\smallskip
 \begin{table}[h]
@@ -314,9 +324,17 @@ As shown in Table~\ref{table:post-selection-test}, the hold-out average t-values
 %
 \end{figure}
 
-While the hold-out average procedure can be applied to other methods, solar has several intrinsic advantages. Firstly, to ensure accurate tests with only half the sample, it is important to retain residual degrees of freedom, implying that variable selection must be as sparse and accurate as possible. As shown in Sections~\ref{section:comp} and \ref{section:application}, sparse and accurate selection is one of the benefits of solar. Secondly, compared to FR and lasso, the average $L_0$ path of solar is robust to settings of the irrepresentable condition, sampling noise, multicollinearity, and other issues, which benefits post-selection tests when deciding which $\beta_i$ to test. 
+While the hold-out average procedure can be applied to other methods, solar has several intrinsic advantages. 
 
-To conclude, Example~1 illustrates that the hold-out average may significantly reduce the severity of `p-value overfitting' while utilizing as many data points as possible for selection and testing. This method helps reduce the severity of informative variable omission or redundant variable inclusion. $\blacksquare$
+\begin{itemize}
+  %
+  \item Firstly, to ensure accurate tests with only half the sample, it is important to retain residual degrees of freedom, implying that variable selection must be as sparse and accurate as possible. As shown in Sections~\ref{section:comp} and \ref{section:application}, sparse and accurate selection is one of the benefits of solar. 
+  %
+  \item \hl{Secondly, the residual degree of freedom is less than $p$ in high dimensional data; hence, when applying post-selection tests to rectify redundant variable selections or informative variable omissions, we need decide which $\beta_i$ to test.} \citet[Theorem~2]{zhang09} \hl{suggests that the earlier a variable enters the path, the more likely it is informative. As a result, we should testing variables with higher ranks in priority. Compared to FR and lasso paths, the ranking in average $L_0$ path of solar is robust to settings of the irrepresentable condition, sampling noise, multicollinearity, and other issues. Hence, solar also provides a stable and accurate guidance on $\beta_i$ testing priority.}
+  %
+\end{itemize}
+
+To conclude, Example~1 illustrates that the hold-out average may significantly reduce the severity of `p-value overfitting' while utilizing as many data points as possible for selection and testing. This method helps reduce the severity of informative variable omission or redundant variable inclusion. 
 
 \subsection{Solar advantages under complicated dependence structures\label{section:example}}
 
@@ -334,7 +352,7 @@ Indeed, solar has another advantage: the average $L_0$ solution path offers addi
 %
 \end{figure}
 
-Consider the non-standard regression case in Figure~\ref{fig:uncond_example}, where $Y$ has two informative variables: a spouse ($\mathbf{x}_1$) and a child ($\mathbf{x}_2$). Figure~\ref{fig:uncond_example} depicts a common scenario in empirical regression: \emph{informative variables} may be \emph{unconditionally uncorrelated to} $Y$ in the DGP. With such data, Example~4 demonstrates that forward regression (including solar and lasso) is more reliable than post-lasso rules and variable screening.
+Consider the non-standard regression case in Figure~\ref{fig:uncond_example}, \hl{which depicts a very common empirical regression problem in biostatistics and finance: \emph{informative variables} may be \emph{unconditionally uncorrelated to} $Y$ in the DGP. For instance, either concussion ($\mathbf{x}_1$) or brain tumor ($Y$) may cause headache ($\mathbf{x}_2$), implying that we must consider the concussion history when diagnosing a brain tumor. Hence, $\mathbf{x}_1$ and $\mathbf{x}_2$ are informative variables for $Y$, even though $\mathbf{x}_1$ and $Y$ are independent.} In such scenario, Example~4 demonstrates that solar is more reliable than post-lasso rules and variable screening.
 
 \smallskip
 \noindent
@@ -376,8 +394,19 @@ Variable screening methods \citep{fan2008sure} may also be prone to selecting re
 
 The average $L_0$ solution path will not suffer the same problem. For convenience, assume $-\alpha_1 / \alpha_2 > 0$ and $p/n = 100/200$ or smaller. For lars, as we increase $\left\Vert \beta_2 \right\Vert_1$ at stage~1 (i.e., as we `partial' $\mathbf{x}_2$ out of $Y$), the unconditional correlation between $Y - \beta_2 \mathbf{x}_2$ and $\mathbf{x}_1$ will increase above $0$ significantly while the marginal correlation between $Y - \beta_2 \mathbf{x}_2$ and any redundant variable will remain approximately $0$. Thus, in the $L_0$ solution path and, hence, the average $L_0$ solution path, $\mathbf{x}_1$ will be included immediately after $\mathbf{x}_2$ is included. $\blacksquare$
 
-\smallskip
-The next example illustrates another common scenario in empirical regression: \emph{redundant variables} may be \emph{unconditionally correlated to} $Y$ in the DGP. In this example, we choose specific values for $\beta_1$, $\beta_2$, $\omega$, and $\delta$ to demonstrate that, even when IRC is satisfied, the strong rule, base rule, and variable screening methods may have difficulty purging the redundant $\mathbf{x}_3$. By contrast, solar is more reliable.
+\citet{fan2008sure} and \citet{barut2016conditional} propose three solutions for the Example~2 variable screening issue. However,
+
+\begin{itemize}
+  %
+  \item the first approach \citep[Section~2.2 and~3]{barut2016conditional} assumes the identity of $\mathbf{x}_2$ in Example~2 and Figure~\ref{fig:uncond_example} is known (also called a \emph{collider} in Bayesian network or probabilistic graph modelling, \citet{barut2016conditional} call it a \emph{hidden signature} variable and denote it by $X_c$), which is unlikely to be realistic in practical applications;
+  %
+  \item the second approach \citep[Section~1 and~2.2]{barut2016conditional} suggests that randomly trying out several variables as colliders may be beneficial. The logic is straightforward: randomly trying out the wrong variable to be a collider ($\mathbf{x}_2$ in Example~2 and Figure~\ref{fig:uncond_example}) is harmless because conditioning on that variable will not make $corr(Y,\mathbf{x}_1) \neq 0$, nor will it cause the selection of a redundant variable. Moreover, by repeatedly randomly trying out variables, there is a non-zero probability the correct collider is eventually uncovered, producing a statistically significant $corr(Y,\mathbf{x}_1) \neq 0$. However, this method crucially relies on multiple trials, which may be inefficient and computationally expensive, especially with high-dimensional data. \hl{Even though $corr(Y, \mathbf{x}_1) \neq 0$ after simultaneously trying out multiple variables (say $\left\{\mathbf{x}_2, \mathbf{x}_3, \ldots, \mathbf{x}_{99} \right\}$), we still need to additionaly check whether there are redundant variales among $\left\{\mathbf{x}_2, \mathbf{x}_3, \ldots, \mathbf{x}_{99} \right\}$ in case of selecting redundant variables, leaving variable selection a possible loose end.}
+  %
+\end{itemize}
+
+\medskip
+
+The next example illustrate another common probelm in empirical regressions: \emph{redundant variables} may be \emph{unconditionally correlated to} $Y$ in the DGP. As shown in Figure~\ref{fig:cond_example}, \hl{such problem often occurs when $\mathbf{x}_3$ and $Y$ are determined by common variables. For instance, house rent ($Y$) and food expenditure ($\mathbf{x}_3$) are both determined by income and saving ($\mathbf{x}_1$ and $\mathbf{x}_2$); however, $\mathbf{x}_3$ is redundant if you have already predict $Y$ with $\{\mathbf{x}_1, \mathbf{x}_2\}$. We carefully choose parameter values to demonstrate that,} even when IRC is satisfied, the strong rule, base rule, and variable screening methods may have difficulty purging the redundant $\mathbf{x}_3$. By contrast, solar is more reliable.
 
 \begin{figure}[h]
   %
@@ -429,7 +458,7 @@ As shown in Figure~\ref{fig:cond_example}, $\mathbf{x}_1$ and $\mathbf{x}_2$ cau
 %
 Because $\mathbf{x}_2$ ranks below $\mathbf{x}_1$ and $\mathbf{x}_3$ in terms of marginal correlations to $Y$, the variable screening method will have to select all $3$ variables, including the redundant $\mathbf{x}_3$, to avoid omitting $\mathbf{x}_2$. Similarly, the base strong rule and safe rule may also have difficulty purging $\mathbf{x}_3$. Because $\mathrm{corr} \left( \mathbf{x}_3, Y \right)$ is larger than $\mathrm{corr} \left( \mathbf{x}_2, Y \right)$, if lasso selects both $\mathbf{x}_3$ and $\mathbf{x}_2$ and we use the base strong rule or the safe rule to purge $\mathbf{x}_3$, we will also have to purge $\mathbf{x}_2$.
 
-Forward regression, solar and lasso will not make the same errors. Because (\ref{eqn:example_4}) does not violate the IRC, variable-selection consistency of forward regression and lars is assured by the theoretical results of \citet{zhang09} and \citet{zhaoyu06}. Specifically in forward regression, $\mathbf{x}_1$ will be included  at the first stage. After controlling for $\mathbf{x}_1$, the partial correlations to $Y$ of both $\mathbf{x}_2$ and $\mathbf{x}_3$ can be ranked in decreasing order as follows (when $n$ is large),
+Forward regression, solar and lasso will not make the same errors. Because (\ref{eqn:example_4}) does not violate the IRC, variable-selection consistency of forward regression, lasso and lars is assured by the theoretical results of \citet{zhang09} and \citet{zhaoyu06}. Specifically in forward regression, $\mathbf{x}_1$ will be included  at the first stage. After controlling for $\mathbf{x}_1$, the partial correlations to $Y$ of both $\mathbf{x}_2$ and $\mathbf{x}_3$ can be ranked in decreasing order as follows (when $n$ is large),
 %
 \begin{equation}
   %
@@ -452,20 +481,7 @@ Thus, at the second stage, forward regression will include $\mathbf{x}_2$, not $
 \smallskip
 Essentially, the strong rule, safe rule, and variable screening struggle in these two examples because they rely on unconditional correlations to $Y$, whereas informative variables in regression analysis are defined in terms of conditional correlations. In many scenarios, unconditional and conditional correlations are aligned. However, when they are not, variable selection based conditional correlation is better placed to select the informative variables.
 
-\citet{fan2008sure} and \citet{barut2016conditional} propose three solutions for the Example~2 variable screening issue. However,
-
-\begin{itemize}
-  %
-  \item the first approach \citep[Section~2.2 and~3]{barut2016conditional} assumes the identity of $\mathbf{x}_2$ in Example~2 and Figure~\ref{fig:uncond_example} is known (also called a \emph{collider} in Bayesian network or probabilistic graph modelling, \citet{barut2016conditional} call it a \emph{hidden signature} variable and denote it by $X_c$), which is unlikely to be realistic in practical applications;
-  %
-  \item the second approach \citep[Section~1 and~2.2]{barut2016conditional} suggests that randomly trying out several variables as colliders may be beneficial. The logic is straightforward: randomly trying out the wrong variable to be a collider ($\mathbf{x}_2$ in Example~2 and Figure~\ref{fig:uncond_example}) is harmless because conditioning on that variable will not make $corr(Y,\mathbf{x}_1) \neq 0$, nor will it cause the selection of a redundant variable. Moreover, by repeatedly randomly trying out variables, there is a non-zero probability the correct collider is eventually uncovered, producing a statistically significant $corr(Y,\mathbf{x}_1) \neq 0$. However, this method crucially relies on multiple trials, which may be inefficient and computationally expensive, especially with high-dimensional data. Solar and lasso do not face such concerns.
-  %
-  \item the third approach \citep{fan2008sure} requires following a series of steps in a boosting-like ensemble: running variable screening on $Y$, selecting variables having high unconditional correlations with $Y$, and running a lasso of the residuals on the dropped variables. In contrast, by using conditional correlation ranking, solar completes variable selection in a single realization, reducing the computational cost in large-scale applications. Moreover, the \citet{fan2008sure} approach does not solve the Example~3 problem. In their first step, variables with high unconditional correlations to $Y$ (including the redundant $\mathbf{x}_3$) will be selected, implying the inclusion of invalid variables. The issue will be exacerbated if $Y$ has multiple $\mathbf{x}_3$-like siblings within a complicated dependence structure: the multicollinearity will produce inaccurate estimations of the regression coefficients and standard errors in finite samples.
-  %
-\end{itemize}
-
-\noindent
-In short, solar is likely to be more computationally efficient and better at variable selection under complicated dependence structures.
+\citet{fan2008sure} propose the following solutions. That approach requires repeating the following steps: running variable screening on $Y$, selecting variables having high unconditional correlations with $Y$, and running a lasso of the residuals on the dropped variables. In contrast, by using conditional correlation ranking, solar completes variable selection in a single realization, reducing the computational cost in large-scale applications. Moreover, the \citet{fan2008sure} approach does not solve the Example~3 problem. In their first step, variables with high unconditional correlations to $Y$ (including the redundant $\mathbf{x}_3$) will be selected, implying the inclusion of invalid variables. The issue will be exacerbated if $Y$ has multiple $\mathbf{x}_3$-like siblings within a complicated dependence structure: the multicollinearity will produce inaccurate estimations of the regression coefficients and standard errors in finite samples. In short, solar is likely to be more computationally efficient and better at variable selection under complicated dependence structures.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -557,15 +573,15 @@ In a similar vein, we introduce the bootstrap solar ensemble \emph{(bsolar)}, wh
 
 \subsection{Simulation settings}
 
-The DGP is as follows. The response variable $Y \in \mathbb{R}^{n \times 1}$ is generated by
+The DGP is as follows. \hl{All $p$ covariates in $X \in \mathbb{R}^{n \times p}$ are generated by a zero-mean, multivariate Gaussian, with covariance matrix having 1 on the main diagonal and 0.5~for the off-diagonal elements. The first 5 are informative variales, generating the response variable $Y \in \mathbb{R}^{n \times 1}$ as}
 %
 \begin{equation}
 %
-  Y =  X\beta + e = 2 \mathbf{x}_0 + 3 \mathbf{x}_1 + 4 \mathbf{x}_2 + 5 \mathbf{x}_3 + 6 \mathbf{x}_4  + e
+  Y =  2 \mathbf{x}_0 + 3 \mathbf{x}_1 + 4 \mathbf{x}_2 + 5 \mathbf{x}_3 + 6 \mathbf{x}_4  + e,
   \label{eqn:pop_model}
 \end{equation}
 %
-where $X \in \mathbb{R}^{n \times p}$ is zero-mean, multivariate Gaussian, with covariance matrix having 1 on the main diagonal and 0.5~for the off-diagonal elements. All data points are independently and identically distributed. Each $\mathbf{x}_j$ is independent from the noise term $e$, which is standard Gaussian. Solar competes with $K$-fold, cross-validated lasso (denoted `lasso' for short). We choose the number of CV folds and the number of subsamples generated in Algorithm~\ref{algo:APE-lar} to be $10$, following the \citet{friedman2001elements} simulations that show $K = 10$ balances the bias-variance trade-off in CV error minimization.
+\hl{where $e\in \mathbb{R}^{n \times 1}$ is a standard Gaussian noise.} All data points are independently and identically distributed. Each $\mathbf{x}_j$ is independent from the noise term $e$, which is standard Gaussian. Solar competes with $K$-fold, cross-validated lasso (denoted `lasso' for short). We choose the number of CV folds and the number of subsamples generated in Algorithm~\ref{algo:APE-lar} to be $10$, following the \citet{friedman2001elements} simulations that show $K = 10$ balances the bias-variance trade-off in CV error minimization.
 
 We use three criteria to compare the variable-selection performance of solar and lasso: sparsity, accuracy, and runtime. Sparsity is measured by the mean of the number of variables selected. Accuracy is measured by the average number of selected informative variables. Runtime is the average CPU time for one realization.
 
@@ -575,7 +591,7 @@ In this simulation, we generate data with various $p/n$ (each with 200 repeats a
 
 We carefully design the simulation settings so that our comparisons are fair, representative, and generalizable and, in particular, to enable a like-for-like comparison to state-of-the-art lasso algorithms.
 
-First, to maximize computation speed, we use \texttt{Numpy}, \texttt{Scipy}, and \texttt{Cython}---all well-known for performance and speed---to outsource all numerical and matrix operations to \texttt{Intel MKL}, currently the fastest and most accurate C++/Fortran library for CPU numerical operations. \hl{Thus, will have only a negligible effect on computation speed and accuracy}.\footnote{See \url{https://jwalton.info/Python-MKL-openBLAS/} for more detail.}
+First, to maximize computation speed, we use \texttt{Numpy}, \texttt{Scipy}, and \texttt{Cython}---all well-known for performance and speed---to outsource all numerical and matrix operations to \texttt{Intel MKL}, currently the fastest and most accurate C++/Fortran library for CPU numerical operations.
 
 Second, to reduce the possibility of CPU and RAM bottlenecks in parallel computing of the lasso and lasso-related subsampling algorithms, we choose Python rather than R as the programming interface. Research shows [e.g., \citet{donoho201750}]  that ``R has the well-known reputation of being less scalable than Python to large problem sizes'', which is  due to its memory-CPU management. Given the simulations repeat solar, lasso, and lasso-related subsampling algorithms many times to arrive at accurate average performance measures, choosing Python over R greatly reduces any potential hardware limitations. Moreover, computations are carried out with an Intel Xeon W-3245 CPU with 3.2GHz frequency, 10-processor parallelization, and 64GB RAM, further reducing the possibility of CPU-RAM bottlenecks.
 
@@ -604,9 +620,9 @@ Lastly, to optimize computation and avoid large overheads, we implement 10-proce
         \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
         &                              & \multicolumn{1}{c}{$\frac{100}{100}$} & \multicolumn{1}{c}{$\frac{100}{150}$} & \multicolumn{1}{c}{$\frac{100}{200}$} & \multicolumn{1}{c}{$\frac{150}{100}$} & \multicolumn{1}{c}{$\frac{200}{150}$} & \multicolumn{1}{c}{$\frac{250}{200}$} & \multicolumn{1}{c}{$\frac{400}{200}$} & \multicolumn{1}{c}{$\frac{800}{400}$} & \multicolumn{1}{c}{$\frac{1200}{600}$}  \\
   \midrule
-  average number of  & lasso            & 19.73 & 19.84 & 19.54 & 22.30 & 23.57 & 26.56 & 28.92 & 34.91 & 35.34 \\
-  selected variables & solar            & 9.86  & 8.66  & 8.50  & 11.34 & 9.8   & 8.2   & 10.54 & 14.85 & 14.91 \\
-                     & solar + hold out & 5.02  & 5.12  & 5.17  & 4.99  & 5.16  & 5.13  & 5.12  & 5.24  & 5.26  \\
+  average number of  & lasso            & 19.73 & 19.84 & 19.54 & 22.30 & 23.57 & 26.56 & 28.92 & 33.88 & 37.96 \\
+  selected variables & solar            &  9.86 &  8.66 &  8.50 & 11.34 &  9.8  &  8.2  & 10.54 & 13.28 & 15.52 \\
+                     & solar + hold out &  5.02 &  5.12 &  5.17 &  4.99 &  5.16 &  5.13 &  5.12 &  5.24 &  5.26 \\
                      \\ [-8pt]
 
                      & bsolar-3S/3H     & 5.44  & 5.18  & 5.22  & 5.44  & 5.18  & 5.22  & 5.25  & 5.86  & 6.09  \\
@@ -626,7 +642,7 @@ Lastly, to optimize computation and avoid large overheads, we implement 10-proce
                        & bsolar-3S/3H/5S/5H/10S/10H & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 \\
 
                        \\ [-8pt]
-	                     & bolasso-S/H      & 5    & 5 & 5 & 5    & 5 & 5 & 5 & 5 & 5 \\
+	                     & bolasso-S/H      & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 \\
   \\[-8pt]
   average runtime & solar + hold out       & 0.07  & 0.08  & 0.08  & 0.08  & 0.10  & 0.13  & 0.19  & 0.49   & 0.83   \\
                   & bsolar-3               & 0.11  & 0.16  & 0.15  & 0.10  & 0.15  & 0.22  & 0.41  & 0.74   & 1.48   \\
@@ -709,30 +725,31 @@ Since bsolar and bolasso are very similar in terms of their computation procedur
 
 \subsubsection{Comparison with previous lasso computation research}
 
-Our finding on bolasso actually aligns with the previous research on lasso. With same number of folds for CV ($K=10$) and number of $\lambda$ in the grid search (100), the time complexity of lasso is only relevent to $n$ and $p$. Thus, we conduct the following comparison at $p/n=1000/100, corr=0.5$.
+Our finding on bolasso actually aligns with the previous research on lasso. With same number of folds for CV ($K=10$), \hl{number of $\lambda$ in the grid search (100), and convergence condition, the time complexity of lasso is mostly relevent to $n$, $p$ and pairwise correlation among covariates ($corr$)}. Thus, we conduct the following comparison at $p/n=1000/100, corr=0.5$.
 
 \begin{itemize}
   %
-  \item \citet[Table 1]{friedman2010regularization} shows that, on a 2-core Intel Xeon CPU with 2.8GHz frequency, the average runtime of one pathwise coordinate descent realiztion in Fortran is 0.07 seconds with covariance updating and 0.04 seconds without. The \citet{friedman2010regularization} result only record the time for coordinate descent computation.
+  \item \citet[Table 1]{friedman2010regularization} shows that, on a 2-core Intel Xeon CPU with 2.8GHz frequency, the average runtime of one pathwise coordinate descent realiztion in Fortran is 0.07 seconds with covariance updating. The \citet{friedman2010regularization} result only record the time for coordinate descent computation.
   %
-  \item Using Intel Xeon W-3245 CPU with 3.2GHz frequency and 10-processor parallelization, the average runtime for our coordinate descent bolasso package is 44.25 seconds, accounting for 256 realizations of 10-fold, cross-validated lasso. Hence, the total 44.25 seconds is for 2816 coordinate descent realizations, resulting in 0.015 seconds per realization. With a slightly faster CPU frequency, our average time also account for generating data, ranking varaibles in bolasso and a final-stage variable selection.
+  \item Using Intel Xeon W-3245 CPU with 3.2GHz frequency and 10-processor parallelization, the average runtime for our coordinate descent bolasso package is 41.92 seconds with covariance precomputed automatically, accounting for 256 realizations of 10-fold, cross-validated lasso. Hence, the total 41.92 seconds is for 2816 coordinate descent realizations, resulting in 0.014 seconds per realization. With a slightly faster CPU frequency, our average time also account for generating data, ranking varaibles in bolasso and a final-stage variable selection.
   %
 \end{itemize}
 
-Thus, comparing our result to \citet{friedman2010regularization}, our average speedup for one pathwise coordinate descent is roughly 2.35-4.12. The theoretical maximum speedup can be accurately calculated via Amdahl's law. Both lars and coordinate descent requre 10 repetitions to optimize $\lambda$ and one extra to compute $\beta$ based on the previous 10, implying that 1 of the 11 repetitions (11\% of the computations, including data generation, variable ranking, matrix manipulation, I/O, etc.) is not parallelizable. Hence, with a given computation load ($n$ and $p$), Amdahl's law implies that the 16-core maximum speedup over 2-core is roughly
-
+Thus, comparing our result to \citet{friedman2010regularization}, our average speedup for one pathwise coordinate descent is roughly 5. The theoretical maximum speedup can be accurately calculated via Amdahl's law. Both lars and coordinate descent requre 10 repetitions to optimize $\lambda$ and one extra to compute $\beta$ based on the previous 10, implying that 1 of the 11 repetitions (11\% of the computations, including data generation, variable ranking, matrix manipulation, I/O, etc.) is not parallelizable. Hence, with a given computation load ($n$ and $p$), Amdahl's law implies that the 16-core maximum speedup over 2-core is roughly
+%
 \begin{equation}
   %
-  \frac{1}{\mbox{non-parallelizable proportion} + \frac{\mbox{parallelizable proportion}}{\mbox{core number multiplier}}} = \frac{1}{0.11 + (1-0.11)/(16/2)} \approx 4.5.
+  \frac{1}{\rho + (1-\rho)/s} = \frac{1}{0.11 + (1-0.11)/(16/2)} \approx 4.52.
   %
 \end{equation}
+%
+\hl{where $\rho$ is the computation proportion that is not parallelizable, $s$ is the computation speedup for the parallelizable proportion (e.g., the core number multiple). Note that our CPU frequency is also higher than the} \citet[Table 1]{friedman2010regularization} \hl{($3.2$GHz over $2.8$); hence, we need to adjust the maximum speedup above by multiplying with the frequency multiple ($3.2/2.8$), resulting the final maximum speedup as $4.52 \times 3.2/2.8 \approx 5.17$.}
 
-\noindent
-Comparing our improvement with Amdahl's law, our coordinate descent bolasso package is very competitive in terms of parallel computation efficiency. Nonetheless, bolasso still requires a large computation time with $p/n=1200/600$ due to the $256$ CV-lasso repetitions, once again confirming the bsolar computation advantage.
+\hl{It is hard to make a perfectly fair comparison of runtimes with different hardwares. However, by comparing our lasso speedup with Amdahl's law, we can somehow illustrate that our coordinate descent bolasso package is very competitive in terms of parallel computation efficiency.} Nonetheless, bolasso still requires a large computation time with $p/n=1200/600$ due to the $256$ CV-lasso repetitions, once again confirming the bsolar computation advantage.
 
 Due to the lean parallelization design, the solar parallelization can be further improved. However, for a fair bsolar-bolasso comparison, we design the 10-processor parallelization algorithm to be the same for both. Due to the small number of subsample solar repetitions (3), our 10-processor parallelization is more than sufficient for bsolar-3. Thus, unlike bolasso, the performance of bsolar will not be compromised by the number of CPU cores, implying a similar efficiency on 4- and 8-core CPUs (such as i7-8500u and i9-9900k). By contrast, bolasso will suffer a large parallel overhead with a smaller number of CPU cores due to its large computation load.
 
-The runtime analysis may be extended to a comparison between the hold-out average and bootstrap-based data-splitting tests, as in \citet{meinshausen2009p}. Bootstrap-based data-splitting tests require computationally costly, bootstrap-like repetitions: each bootstrap subsample is split, with one portion used for selection and the other for testing. Thus, with lasso used for variable selection, the runtime for the bootstrap-based data-splitting test with 256 bootstrap subsamples will be close to that of bolasso in Table~\ref{table:sim_1}. By contrast, the hold-out average only uses one realization of variable selection and two t-tests, offering a faster runtime.
+The runtime analysis may be extended to a comparison between the hold-out average and the bootstrap-based data-splitting tests, as in \citet{meinshausen2009p}. Bootstrap-based data-splitting tests require computationally costly, bootstrap-like repetitions: each bootstrap subsample is split, with one portion used for selection and the other for testing. Thus, with lasso used for variable selection, the runtime for the bootstrap-based data-splitting test with 256 bootstrap subsamples will be close to that of bolasso in Table~\ref{table:sim_1}. By contrast, the hold-out average only uses one realization of variable selection and two t-tests, offering a faster runtime.
 
 \section{Real-world data: Sydney house price prediction\label{section:application}}
 
