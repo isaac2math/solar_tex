@@ -989,6 +989,11 @@ INPUT figures//acc_plot_top20_ic_5_False_solar-crop.pdf
 INPUT ./figures//acc_plot_top20_ic_5_False_solar-crop.pdf
 INPUT ./figures//acc_plot_top20_ic_5_False_solar-crop.pdf
 INPUT /usr/local/texlive/2021/texmf-dist/fonts/tfm/public/cm/cmss10.tfm
+INPUT ./figures//runtime.pdf
+INPUT ./figures//runtime.pdf
+INPUT figures//runtime.pdf
+INPUT ./figures//runtime.pdf
+INPUT ./figures//runtime.pdf
 INPUT TeXAux/v1a_ning.bbl
 INPUT TeXAux/v1a_ning.bbl
 INPUT TeXAux/v1a_ning.bbl

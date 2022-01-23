@@ -745,7 +745,20 @@ Thus, comparing our result to \citet{friedman2010regularization}, our average sp
 %
 \hl{where $\rho$ is the computation proportion that is not parallelizable, $s$ is the computation speedup for the parallelizable proportion (e.g., the core number multiple). Note that our CPU frequency is also higher than the} \citet[Table 1]{friedman2010regularization} \hl{($3.2$GHz over $2.8$); hence, we need to adjust the maximum speedup above by multiplying with the frequency multiple ($3.2/2.8$), resulting the final maximum speedup as $4.52 \times 3.2/2.8 \approx 5.17$.}
 
-\hl{It is hard to make a perfectly fair comparison of runtimes with different hardwares. However, by comparing our lasso speedup with Amdahl's law, we can somehow illustrate that our coordinate descent bolasso package is very competitive in terms of parallel computation efficiency.} Nonetheless, bolasso still requires a large computation time with $p/n=1200/600$ due to the $256$ CV-lasso repetitions, once again confirming the bsolar computation advantage.
+\begin{figure}[h]
+  %
+  \centering
+  %
+  \includegraphics[width=0.8\linewidth]{runtime.pdf}
+  %
+  \caption{Average runtime comparison with different input matrix sizes (by pathwise coordinate descent).}
+  %
+  \label{fig:runtime}
+  %
+\end{figure}
+
+
+\hl{It is hard to make a perfectly fair comparison of runtimes with different hardwares. However, by comparing our lasso speedup with Amdahl's law, we can somehow illustrate that our coordinate descent bolasso package is very competitive in terms of parallel computation efficiency.} Nonetheless, bolasso still requires a large computation time with $p/n=1200/600$ due to the $256$ CV-lasso repetitions, once again confirming the bsolar computation advantage. Furthermore, Figure~\ref{fig:runtime} \hl{illustrates how the average runtime progresses when the input matrix size increases. The matrix size in the figure emulates how the computation load increases for the regression algorihtms at the reproducing kernel Hilbert space (e.g., the kernel ridge and kernel lasso regression). Bsolar-3 runtime remains quite affordable while bolasso runtime increases exponentially, further confirming that bolasso is not efficient for a large input matrix.}
 
 Due to the lean parallelization design, the solar parallelization can be further improved. However, for a fair bsolar-bolasso comparison, we design the 10-processor parallelization algorithm to be the same for both. Due to the small number of subsample solar repetitions (3), our 10-processor parallelization is more than sufficient for bsolar-3. Thus, unlike bolasso, the performance of bsolar will not be compromised by the number of CPU cores, implying a similar efficiency on 4- and 8-core CPUs (such as i7-8500u and i9-9900k). By contrast, bolasso will suffer a large parallel overhead with a smaller number of CPU cores due to its large computation load.
 

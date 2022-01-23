@@ -1,13 +1,13 @@
 # Fdb version 3
-["bibtex TeXAux/v1a_ning"] 1642787828 "TeXAux/v1a_ning.aux" "TeXAux/v1a_ning.bbl" "TeXAux/v1a_ning" 1642787829
+["bibtex TeXAux/v1a_ning"] 1642964007 "TeXAux/v1a_ning.aux" "TeXAux/v1a_ning.bbl" "TeXAux/v1a_ning" 1642964542
   "/usr/local/texlive/2021/texmf-dist/bibtex/bst/elsarticle/elsarticle-harv.bst" 1606256092 30002 8c0c5833f37bea3ec214cf315a72975d ""
-  "TeXAux/v1a_ning.aux" 1642787829 17977 d3ee84a0be83391c891d5b708d6d286a "pdflatex"
+  "TeXAux/v1a_ning.aux" 1642964542 18355 72ceeb1e82cc54938a8c39f9422a23fe "pdflatex"
   "ref/CVrefs.bib" 1642572451 68296 07923c42cc8320052c12cfd7fd94654f ""
   (generated)
   "TeXAux/v1a_ning.bbl"
   "TeXAux/v1a_ning.blg"
-["pdflatex"] 1642787828 "/Users/ning/Dropbox/Working_Directory/Python/Stability/solar/solar_regression/paper/v_current_Ning/v1a_ning.tex" "TeXAux/v1a_ning.pdf" "v1a_ning" 1642787829
-  "/Users/ning/Dropbox/Working_Directory/Python/Stability/solar/solar_regression/paper/v_current_Ning/v1a_ning.tex" 1642787827 92126 f2b8f2eeef7ed0ce2532d31c285efa7e ""
+["pdflatex"] 1642964541 "/Users/ning/Dropbox/Working_Directory/Python/Stability/solar/solar_regression/paper/v_current_Ning/v1a_ning.tex" "TeXAux/v1a_ning.pdf" "v1a_ning" 1642964542
+  "/Users/ning/Dropbox/Working_Directory/Python/Stability/solar/solar_regression/paper/v_current_Ning/v1a_ning.tex" 1642964541 92864 a4cd7c8ef984126703ad3c496703305a ""
   "/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc" 1136849721 2900 1537cc8184ad1792082cd229ecc269f4 ""
   "/usr/local/texlive/2021/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
   "/usr/local/texlive/2021/texmf-dist/fonts/tfm/jknappen/ec/ectt1000.tfm" 1136768653 1536 06717a2b50de47d4087ac0e6cd759455 ""
@@ -165,10 +165,10 @@
   "/usr/local/texlive/2021/texmf-var/fonts/map/pdftex/updmap/pdftex.map" 1639889251 4376442 c557f5804334a2b402a3bd518ae75673 ""
   "/usr/local/texlive/2021/texmf-var/web2c/pdftex/pdflatex.fmt" 1639889275 2820137 b64bca7c850d65a7204136c6cf98ed4a ""
   "/usr/local/texlive/2021/texmf.cnf" 1616695596 577 4c1911a7228e554c6032256d3cf5567d ""
-  "TeXAux/v1a_ning.aux" 1642787829 17977 d3ee84a0be83391c891d5b708d6d286a "pdflatex"
-  "TeXAux/v1a_ning.bbl" 1642787828 13916 67ec9e0b3064fb366232fdef305a2afa "bibtex TeXAux/v1a_ning"
-  "TeXAux/v1a_ning.out" 1642787829 5376 51891a12a637938589bd8e8af0731ee8 "pdflatex"
-  "TeXAux/v1a_ning.spl" 1642787828 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "TeXAux/v1a_ning.aux" 1642964542 18355 72ceeb1e82cc54938a8c39f9422a23fe "pdflatex"
+  "TeXAux/v1a_ning.bbl" 1642964007 13916 67ec9e0b3064fb366232fdef305a2afa "bibtex TeXAux/v1a_ning"
+  "TeXAux/v1a_ning.out" 1642964542 5376 51891a12a637938589bd8e8af0731ee8 "pdflatex"
+  "TeXAux/v1a_ning.spl" 1642964541 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
   "figures//acc_plot_top20_ic_25_False_lars-crop.pdf" 1640178572 17905 d12cd152582cdd60a7f9dddf9f0707e2 ""
   "figures//acc_plot_top20_ic_25_False_solar-crop.pdf" 1640178566 17069 0fc519a03a519581ee9fb6960000f5fd ""
   "figures//acc_plot_top20_ic_33_False_lars-crop.pdf" 1640178548 17935 5299a3f969e4b0375f7200f9dc038604 ""
@@ -178,10 +178,11 @@
   "figures//example3.pdf" 1640163799 42817 304af0686e7b02fd805dbfdf5bb88fae ""
   "figures//q_demo_1new.pdf" 1565943665 93823 2a4c792c0e4573464b8dc61a4b8aa710 ""
   "figures//q_demo_3.pdf" 1639966451 123975 032d33dc25c68f258dce82af9f31409c ""
+  "figures//runtime.pdf" 1642964449 16963 709468cb1ab88f515877d1419fbc6351 ""
   "figures//t_value_compare.jpg" 1617964235 1313460 8a90dd1e6fcfa90cc1aaa0e348608401 ""
   "figures//uncond_example.pdf" 1640163888 61088 fdb25f9b3a765f3f5f399ecf832ccc03 ""
   "frontmatter/preamble.tex" 1642739725 1200 9e00b6de9a851d588c5e1b1441b268bd ""
-  "v1a_ning.tex" 1642787827 92126 f2b8f2eeef7ed0ce2532d31c285efa7e ""
+  "v1a_ning.tex" 1642964541 92864 a4cd7c8ef984126703ad3c496703305a ""
   (generated)
   "TeXAux/v1a_ning.aux"
   "TeXAux/v1a_ning.log"
