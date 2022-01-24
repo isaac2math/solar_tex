@@ -1,7 +1,6 @@
 /ppt
-/figures
 **/.DS_Store
-/TeXAux/old_version.tex
+/TeXAux
 *.sh
 revision_summary.txt
 .DS_Store
