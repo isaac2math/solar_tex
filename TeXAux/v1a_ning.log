@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.12.19)  24 JAN 2022 06:02
+This is pdfTeX, Version 3.141592653-2.6-1.40.23 (TeX Live 2022/dev) (preloaded format=pdflatex 2021.12.19)  24 JAN 2022 21:28
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -657,7 +657,7 @@ Package pdftex.def Info: figures//q_demo_3.pdf  used on input line 208.
 
 LaTeX Warning: `h' float specifier changed to `ht'.
 
-<figures//t_value_compare.jpg, id=379, 578.16pt x 216.81pt>
+<figures//t_value_compare.jpg, id=380, 578.16pt x 216.81pt>
 File: figures//t_value_compare.jpg Graphic file (type jpg)
 <use figures//t_value_compare.jpg>
 Package pdftex.def Info: figures//t_value_compare.jpg  used on input line 319.
@@ -666,79 +666,83 @@ Package pdftex.def Info: figures//t_value_compare.jpg  used on input line 319.
 LaTeX Warning: `h' float specifier changed to `ht'.
 
 [9] [10 <./figures//t_value_compare.jpg>]
-<figures//uncond_example.pdf, id=397, 293.37706pt x 90.21605pt>
+<figures//uncond_example.pdf, id=398, 293.37706pt x 90.21605pt>
 File: figures//uncond_example.pdf Graphic file (type pdf)
 <use figures//uncond_example.pdf>
 Package pdftex.def Info: figures//uncond_example.pdf  used on input line 347.
 (pdftex.def)             Requested size: 215.00699pt x 66.11595pt.
  [11 <./figures//uncond_example.pdf, page is rotated 90 degrees>] [12]
-<figures//example3.pdf, id=458, 219.39366pt x 91.06522pt>
+<figures//example3.pdf, id=459, 219.39366pt x 91.06522pt>
 File: figures//example3.pdf Graphic file (type pdf)
 <use figures//example3.pdf>
 Package pdftex.def Info: figures//example3.pdf  used on input line 415.
 (pdftex.def)             Requested size: 215.00699pt x 89.24467pt.
  [13 <./figures//example3.pdf, page is rotated 90 degrees>] [14]
-<figures//acc_plot_top20_ic_25_False_lars-crop.pdf, id=499, 397.485pt x 149.55875pt>
+<figures//acc_plot_top20_ic_25_False_lars-crop.pdf, id=500, 397.485pt x 149.55875pt>
 File: figures//acc_plot_top20_ic_25_False_lars-crop.pdf Graphic file (type pdf)
 <use figures//acc_plot_top20_ic_25_False_lars-crop.pdf>
 Package pdftex.def Info: figures//acc_plot_top20_ic_25_False_lars-crop.pdf  used on input line 531.
 (pdftex.def)             Requested size: 153.57375pt x 57.78453pt.
-<figures//acc_plot_top20_ic_33_False_lars-crop.pdf, id=500, 397.485pt x 149.55875pt>
+<figures//acc_plot_top20_ic_33_False_lars-crop.pdf, id=501, 397.485pt x 149.55875pt>
 File: figures//acc_plot_top20_ic_33_False_lars-crop.pdf Graphic file (type pdf)
 <use figures//acc_plot_top20_ic_33_False_lars-crop.pdf>
 Package pdftex.def Info: figures//acc_plot_top20_ic_33_False_lars-crop.pdf  used on input line 534.
 (pdftex.def)             Requested size: 153.57375pt x 57.78453pt.
-<figures//acc_plot_top20_ic_5_False_lars-crop.pdf, id=501, 397.485pt x 149.55875pt>
+<figures//acc_plot_top20_ic_5_False_lars-crop.pdf, id=502, 397.485pt x 149.55875pt>
 File: figures//acc_plot_top20_ic_5_False_lars-crop.pdf Graphic file (type pdf)
 <use figures//acc_plot_top20_ic_5_False_lars-crop.pdf>
 Package pdftex.def Info: figures//acc_plot_top20_ic_5_False_lars-crop.pdf  used on input line 537.
 (pdftex.def)             Requested size: 153.57375pt x 57.78453pt.
-<figures//acc_plot_top20_ic_25_False_solar-crop.pdf, id=502, 397.485pt x 149.55875pt>
+<figures//acc_plot_top20_ic_25_False_solar-crop.pdf, id=503, 397.485pt x 149.55875pt>
 File: figures//acc_plot_top20_ic_25_False_solar-crop.pdf Graphic file (type pdf)
 <use figures//acc_plot_top20_ic_25_False_solar-crop.pdf>
 Package pdftex.def Info: figures//acc_plot_top20_ic_25_False_solar-crop.pdf  used on input line 540.
 (pdftex.def)             Requested size: 153.57375pt x 57.78453pt.
-<figures//acc_plot_top20_ic_33_False_solar-crop.pdf, id=503, 397.485pt x 149.55875pt>
+<figures//acc_plot_top20_ic_33_False_solar-crop.pdf, id=504, 397.485pt x 149.55875pt>
 File: figures//acc_plot_top20_ic_33_False_solar-crop.pdf Graphic file (type pdf)
 <use figures//acc_plot_top20_ic_33_False_solar-crop.pdf>
 Package pdftex.def Info: figures//acc_plot_top20_ic_33_False_solar-crop.pdf  used on input line 543.
 (pdftex.def)             Requested size: 153.57375pt x 57.78453pt.
-<figures//acc_plot_top20_ic_5_False_solar-crop.pdf, id=504, 397.485pt x 149.55875pt>
+<figures//acc_plot_top20_ic_5_False_solar-crop.pdf, id=505, 397.485pt x 149.55875pt>
 File: figures//acc_plot_top20_ic_5_False_solar-crop.pdf Graphic file (type pdf)
 <use figures//acc_plot_top20_ic_5_False_solar-crop.pdf>
 Package pdftex.def Info: figures//acc_plot_top20_ic_5_False_solar-crop.pdf  used on input line 546.
 (pdftex.def)             Requested size: 153.57375pt x 57.78453pt.
- [15] [16 <./figures//acc_plot_top20_ic_25_False_lars-crop.pdf> <./figures//acc_plot_top20_ic_33_False_lars-crop.pdf> <./figures//acc_plot_top20_ic_5_False_lars-crop.pdf> <./figures//acc_plot_top20_ic_25_False_solar-crop.pdf> <./figures//acc_plot_top20_ic_33_False_solar-crop.pdf> <./figures//acc_plot_top20_ic_5_False_solar-crop.pdf>] [17] [18] [19]
+ [15 <./figures//acc_plot_top20_ic_25_False_lars-crop.pdf> <./figures//acc_plot_top20_ic_33_False_lars-crop.pdf> <./figures//acc_plot_top20_ic_5_False_lars-crop.pdf> <./figures//acc_plot_top20_ic_25_False_solar-crop.pdf> <./figures//acc_plot_top20_ic_33_False_solar-crop.pdf> <./figures//acc_plot_top20_ic_5_False_solar-crop.pdf>] [16] [17] [18] [19]
 Overfull \hbox (31.48473pt too wide) in paragraph at lines 678--712
 [][] []
  []
 
 [20] [21]
-<figures//runtime.pdf, id=831, 1148.37184pt x 427.4392pt>
+<figures//runtime.pdf, id=834, 1148.37184pt x 427.4392pt>
 File: figures//runtime.pdf Graphic file (type pdf)
 <use figures//runtime.pdf>
 Package pdftex.def Info: figures//runtime.pdf  used on input line 752.
 (pdftex.def)             Requested size: 387.36938pt x 144.186pt.
- [22] [23 <./figures//runtime.pdf>] [24] (TeXAux/v1a_ning.bbl [25] [26]) [27] [28] (TeXAux/v1a_ning.aux)
+
+
+LaTeX Warning: `h' float specifier changed to `ht'.
+
+[22] [23 <./figures//runtime.pdf>] [24] (TeXAux/v1a_ning.bbl [25] [26]) [27] [28] (TeXAux/v1a_ning.aux)
 
 LaTeX Warning: There were multiply-defined labels.
 
 Package rerunfilecheck Info: File `v1a_ning.out' has not changed.
-(rerunfilecheck)             Checksum: 51891A12A637938589BD8E8AF0731EE8;5376.
+(rerunfilecheck)             Checksum: A67E5C45C47BB5C589321A9C7262738D;5376.
  ) 
 Here is how much of TeX's memory you used:
- 15529 strings out of 478353
- 252452 string characters out of 5848085
- 604894 words of memory out of 5000000
+ 15530 strings out of 478353
+ 252463 string characters out of 5848085
+ 609894 words of memory out of 5000000
  33238 multiletter control sequences out of 15000+600000
  416774 words of font info for 77 fonts, out of 8000000 for 9000
  1141 hyphenation exceptions out of 8191
  74i,18n,82p,2017b,611s stack positions out of 5000i,500n,10000p,200000b,80000s
 {/usr/local/texlive/2021/texmf-dist/fonts/enc/dvips/cm-super/cm-super-ts1.enc}</usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmbx9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmex10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cmextra/cmex9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmmi9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr12.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmr9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmss10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy6.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy8.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmti9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/cm/cmtt9.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msam10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb></usr/local/texlive/2021/texmf-dist/fonts/type1/public/cm-super/sfrm1000.pfb>
-Output written on TeXAux/v1a_ning.pdf (28 pages, 2108840 bytes).
+Output written on TeXAux/v1a_ning.pdf (28 pages, 2112059 bytes).
 PDF statistics:
- 1080 PDF objects out of 1200 (max. 8388607)
- 761 compressed objects within 8 object streams
- 160 named destinations out of 1000 (max. 500000)
+ 1085 PDF objects out of 1200 (max. 8388607)
+ 766 compressed objects within 8 object streams
+ 161 named destinations out of 1000 (max. 500000)
  221 words of extra memory for PDF output out of 10000 (max. 10000000)
 
