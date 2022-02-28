@@ -1,0 +1,91 @@
+Our proof steps are briefly summarized as follows:
+
+\bigskip
+\noindent
+\textbf{Step 1}: show that the forward regression stopping rule can be re-parameterized using $\widehat{q\,}^k$ on the $k$th solar subsample. Hence, the forward regression result \citep[Theorem 2]{zhang09} implies Lemma~1.
+
+\begin{lemma}
+  Consider the forward regression algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with A1 satisfied: (i) if the forward selection only selects variables  with $\widehat{q\,}_{i}^{k}>\widetilde{q\,}^{k}$ and stops at the $l^k$th iteration, and (ii) if
+  \[
+    \omega>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}
+  \]
+  and (iii) if
+  \[
+    \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+  \]
+  then
+  \[
+    Pr\left\{ \overline{F}=\left\{ \mathbf{x}_{j}:\widehat{q\,}_{i}^{k}>\widetilde{q\,}^{k}\right\} \right\} \geqslant 1 - 2\eta
+  \]
+  where $\omega$ is $\omega=\left\vert \left(\mathbf{x}^{\left(l^{k}-1\right)}\right)^T u^{\left(l^{k}-1\right)} \right\vert$.
+\end{lemma}
+
+\bigskip
+\noindent
+\textbf{Step 2}: with large probability, find a value ($\widetilde{q\,}^{k}$) that is less than the $\widehat{q\,}^k_j$ value of every informative variable on the $k$th solar subsample. This implies that, with large probability, $\widetilde{q\,}^{k}$ separates the informative from the redundant variables on the $L_0$ path.
+
+\begin{lemma}
+  Consider the forward regression algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with A1 satisfied. With probability larger than $1-2\eta$,  if (i) the forward selection only selects variables with $\widehat{q\,}_{i}^{k}>\widetilde{q\,}^{k}$ and stops at the $l^k$th iteration, and if (ii)
+  \[
+    \omega>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}
+  \]
+  and if (iii)
+  \[
+    \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+  \]
+  then
+  \begin{eqnarray}
+    \widehat{q\,}_{i}^{k}>\widetilde{q\,}^{k},\forall i\leqslant p_{1} \nonumber \\
+    \widehat{q\,}_{i}^{k}\leqslant\widetilde{q\,}^{k},\forall i>p_{1}  \nonumber
+  \end{eqnarray}
+\end{lemma}
+
+\bigskip
+\noindent
+\textbf{Step 3}: define
+  \[
+    \widetilde{q\,}^{*}=\min_{1\leq k\leq K}\left\{ \widetilde{q\,}^{k}\right\}
+  \]
+  and use a concentration inequality to show that, if the $\widehat{q\,}^k_j$ of every informative variable is larger than $\widetilde{q\,}^{k}$ on the $k$th solar subsample, their $\widehat{q}_j$ values (the average of $\widehat{q\,}^k_j$ across all solar subsamples) are also larger than $\widetilde{q\,}^{*}$. This implies that, with large probability, informative variables will be ranked at the beginning of the average $L_0$ path, resulting in Lemma~3.
+
+%%%%%%%%% lemma 3 %%%%%%%%%
+
+\begin{lemma}
+Consider the forward selection algorithm on the average $L_{0}$ path with Assumption~1 satisfied. With probability less than $\eta$, if forward selection only selects variables with $\widehat{q\,}_{i}^{k}>\widetilde{q\,}^{k}$,
+\[
+    \omega>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4Kp/\eta\right)}
+\]
+and
+\[
+    \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+\]
+then
+\[
+\begin{cases}
+    \frac{1}{K}\sum\widehat{q\,}_{i}^{k}=\widehat{q}_{i}>\widetilde{q\,}^{*},\forall i\leqslant p_{1}\\
+    \frac{1}{K}\sum\widehat{q\,}_{i}^{k}=\widehat{q}_{i}\leqslant\widetilde{q\,}^{k},\forall i>p_{1}
+\end{cases}
+\]
+where $\omega$ is defined in Definition 1.
+\end{lemma}
+
+\bigskip
+\noindent
+\textbf{Step 4}: $\log\left(p\right)/n \rightarrow 0$ push $\widetilde{q\,}^{*}$ towards $1$, implying variable selection consistency (Theorem~1).
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% Theorem 1 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\begin{theorem}
+Consider the forward selection algorithm on the average $L_{0}$ path with Assumption~1 satisfied and noise $\sigma$ independent of $n$. Assume that the strong irrepresentable condition holds. For each problem of sample size n, denote $F\left(n\right)$ as the index set of selected variables when forward selection stops with $\omega\geqslant n^{s/2}$, $\forall s\in(0,1]$, and $\overline{F}\left(n\right)$ as the corresponding index set of informative variables. We have
+\[
+    Pr\left(\;F\left(n\right)\neq\overline{F}\left(n\right)\;\right)\leqslant\exp\left(-\frac{n^{s}}{\log\left(n\right)}\right)
+\]
+if
+\[
+    p\left(n\right)\leqslant\exp\left(\frac{n^{s}}{\log\left(n\right)}\right),
+\]
+and
+\[
+    \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3n^{(s-1)/2}}{\rho_{X}\left(\overline{F}\left(n\right)\right)}
+\]
+where $p\left(n\right)$ is the total dimension of variable as $n$ increases.
+\end{theorem}

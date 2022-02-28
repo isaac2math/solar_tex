@@ -9,7 +9,14 @@
 \usepackage{comment}
 \usepackage[letterpaper,margin=0.9in]{geometry}
 \usepackage[ruled,linesnumbered]{algorithm2e}
-%\usepackage{pbox}
+\usepackage[font=normal]{caption}
+\usepackage[title]{appendix}
+
+%thick cdot
+\makeatletter
+\newcommand*\bigcdot{\mathpalette\bigcdot@{.5}}
+\newcommand*\bigcdot@[2]{\mathbin{\vcenter{\hbox{\scalebox{#2}{$\m@th#1\bullet$}}}}}
+\makeatother
 
 \newcommand{\size}[2]{{\fontsize{#1}{0}\selectfont#2}}
 \newenvironment{sizepar}[2]
@@ -20,12 +27,29 @@
 
 \pagestyle{myheadings}
 
+%eqn, def numbering
 \numberwithin{equation}{section}
 
 \theoremstyle{definition}
 \newtheorem{definition}{\protect\definitionname}
 \providecommand{\definitionname}{Definition}
 \numberwithin{definition}{section}
+
+\theoremstyle{plain}
+\newtheorem{lemma}{\protect\lemmaname}
+\providecommand{\lemmaname}{Lemma}
+\numberwithin{lemma}{section}
+
+\theoremstyle{plain}
+\newtheorem{theorem}{\protect\theoremname}
+\providecommand{\theoremname}{Theorem}
+\numberwithin{theorem}{section}
+
+%highlight
+%\newcommand{\hlgreen}[1]{{\sethlcolor{green} \hl{#1}}}
+%\newcommand{\hlning} [2]{{\sethlcolor{orange}\hl{#1}}}
+\newcommand{\hlgreen}[2][green]{{\sethlcolor{#1}\hl{#2}}}
+\newcommand{\hlning}[2][orange]{{\sethlcolor{#1}\hl{#2}}}
 
 \newcommand{\ind}{\perp\!\!\!\!\perp}
 \newcommand{\ts}{\rlap{$^{***}$}}
@@ -40,5 +64,6 @@
 \graphicspath{{figures/}}
 
 % Remove irritating PDFLaTeX warnings
-\pdfminorversion=6
+%\pdfminorversion=6
+\pdfminorversion=7
 \pdfsuppresswarningpagegroup=1

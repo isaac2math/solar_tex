@@ -1,0 +1,677 @@
+#LyX 2.3 created this file. For more info see http://www.lyx.org/
+\lyxformat 544
+\begin_document
+\begin_header
+\save_transient_properties true
+\origin unavailable
+\textclass article
+\begin_preamble
+\RequirePackage{amsthm,amsmath,amssymb}
+\RequirePackage{natbib}
+\usepackage[table,xcdraw]{xcolor}
+\usepackage{arydshln}
+\usepackage{color,soul}
+\usepackage{accents,float,graphicx,subfig,multirow,dcolumn,booktabs,lscape}
+\usepackage[a4paper,margin=2.54cm]{geometry}
+\usepackage[ruled,linesnumbered]{algorithm2e}
+\usepackage{comment}
+\usepackage{xcolor}
+
+\pagecolor[rgb]{0.1,0.1,0.1} %shallow black
+\color[rgb]{0.85,0.85,0.85}  %shallow grey
+
+\numberwithin{equation}{section}
+
+\theoremstyle{definition}
+\newtheorem{definition}{\protect\definitionname}
+\providecommand{\definitionname}{Definition}
+\numberwithin{definition}{section}
+
+\newcommand{\ind}{\perp\!\!\!\!\perp}
+\newcommand{\ts}{\rlap{$^{***}$}}
+\newcommand{\ds}{\rlap{$^{**}$}}
+\newcommand{\s}{\rlap{$^{*}$}}
+
+\def\spacingset#1{\renewcommand{\baselinestretch}{#1}\small\normalsize}\spacingset{1}
+
+\newcolumntype{.}{D{.}{.}{-1}}
+\definecolor{red}{rgb}{1.0, 0.0, 0.0}
+
+\newtheorem*{assumption*}{\assumptionnumber}
+\providecommand{\assumptionnumber}{}
+\makeatletter
+\newenvironment{assumption}[2]
+ {%
+  \renewcommand{\assumptionnumber}{Assumption #1-$\mathcal{#2}$}%
+  \begin{assumption*}%
+  \protected@edef\@currentlabel{#1-$\mathcal{#2}$}%
+ }
+ {%
+  \end{assumption*}
+ }
+\makeatother
+\end_preamble
+\use_default_options true
+\begin_modules
+theorems-ams-bytype
+\end_modules
+\maintain_unincluded_children false
+\language english
+\language_package default
+\inputencoding auto
+\fontencoding global
+\font_roman "default" "default"
+\font_sans "default" "default"
+\font_typewriter "default" "default"
+\font_math "auto" "auto"
+\font_default_family default
+\use_non_tex_fonts false
+\font_sc false
+\font_osf false
+\font_sf_scale 100 100
+\font_tt_scale 100 100
+\use_microtype false
+\use_dash_ligatures true
+\graphics default
+\default_output_format default
+\output_sync 0
+\bibtex_command default
+\index_command default
+\paperfontsize default
+\spacing single
+\use_hyperref false
+\papersize default
+\use_geometry false
+\use_package amsmath 1
+\use_package amssymb 1
+\use_package cancel 1
+\use_package esint 1
+\use_package mathdots 1
+\use_package mathtools 1
+\use_package mhchem 1
+\use_package stackrel 1
+\use_package stmaryrd 1
+\use_package undertilde 1
+\cite_engine basic
+\cite_engine_type default
+\biblio_style plain
+\use_bibtopic false
+\use_indices false
+\paperorientation portrait
+\suppress_date false
+\justification true
+\use_refstyle 1
+\use_minted 0
+\index Index
+\shortcut idx
+\color #008000
+\end_index
+\secnumdepth 3
+\tocdepth 3
+\paragraph_separation indent
+\paragraph_indentation default
+\is_math_indent 0
+\math_numbering_side default
+\quotes_style english
+\dynamic_quotes 0
+\papercolumns 1
+\papersides 1
+\paperpagestyle default
+\tracking_changes false
+\output_changes false
+\html_math_output 0
+\html_css_as_file 0
+\html_be_strict false
+\end_header
+
+\begin_body
+
+\begin_layout Subsection
+Step 1 : reparametrize 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ stopping rule via 
+\begin_inset Formula $\widehat{q}^{k}$
+\end_inset
+
+ 
+\end_layout
+
+\begin_layout Standard
+To accomplish step 1, we need to introduce the theoretical result of Zhang
+ (2009, Theorem 1), which shows that, for a general forward regression on
+ a finite sample, the probability of omitting informative variables are
+ under control.
+ 
+\end_layout
+
+\begin_layout Theorem*
+[Zhang, 09] Consider the forward regression algorithm with Assumption 1
+ satisfied.
+ Given any 
+\begin_inset Formula $\eta\in\left(0,0.5\right)$
+\end_inset
+
+, with probability larger than 
+\begin_inset Formula $1-2\eta$
+\end_inset
+
+, if the stopping criterion satisfies
+\begin_inset Formula 
+\[
+\epsilon>\frac{1}{1-\mu_{X}\left(\overline{F}\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}
+\]
+
+\end_inset
+
+and
+\begin_inset Formula 
+\[
+\min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\epsilon}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n}}
+\]
+
+\end_inset
+
+then when the procedure stops at stage 
+\begin_inset Formula $l$
+\end_inset
+
+, 
+\begin_inset Formula 
+\[
+\overline{F}=F^{\left(l-1\right)},
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $F^{\left(l-1\right)}$
+\end_inset
+
+ is the set of variable selected at stage 
+\begin_inset Formula $l-1$
+\end_inset
+
+.
+ 
+\begin_inset Formula $\blacksquare$
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Zhang (2009) execute each forward selection stage based on 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+.
+ By constrast, we reparametrize forward selection stages (in Algorithm 1)
+ and its stopping rule (in Algorithm 2) using different values of 
+\begin_inset Formula $\widehat{q}$
+\end_inset
+
+.
+ Hence, as shown in Figure, there is an equivalence between the 
+\begin_inset Formula $\epsilon$
+\end_inset
+
+ method and our 
+\begin_inset Formula $\widehat{q}$
+\end_inset
+
+ method as follows, 
+\end_layout
+
+\begin_layout Itemize
+Assume that, on subsample 
+\begin_inset Formula $\left(Y^{k},X^{k}\right)$
+\end_inset
+
+, 
+\begin_inset Formula $\epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}$
+\end_inset
+
+ stops the forward selection at stage 
+\begin_inset Formula $l^{k}$
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+based on line 6 of Algorithm 1, all the variables selected before stage
+ 
+\begin_inset Formula $l^{k}$
+\end_inset
+
+ must have their 
+\begin_inset Formula $\widehat{q}_{i}^{k}$
+\end_inset
+
+ values 
+\begin_inset Formula $>\left(\widetilde{p}+1-l^{k}\right)/\widetilde{p}$
+\end_inset
+
+, where 
+\begin_inset Formula $\widetilde{p}$
+\end_inset
+
+ is defined at line 2.
+\end_layout
+
+\begin_layout Itemize
+hence, we can also say that, on 
+\begin_inset Formula $k$
+\end_inset
+
+th subsample , the forward selection only selects the variables 
+\begin_inset Formula $\left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>\left(\widetilde{p}+1-l^{k}\right)/\widetilde{p}\right\} $
+\end_inset
+
+;
+\end_layout
+
+\begin_layout Itemize
+let's denote 
+\begin_inset Formula 
+\[
+\omega=\left|\left\langle \mathbf{x}^{\left(l^{k}-1\right)},u^{\left(l^{k}-1\right)}\right\rangle \right|,
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $u^{\left(l^{k}-1\right)}$
+\end_inset
+
+ is the regression residual of stage 
+\begin_inset Formula $l^{k}-1$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{x}^{\left(l^{k}-1\right)}$
+\end_inset
+
+ is the variable selected at stage 
+\begin_inset Formula $l^{k}-1$
+\end_inset
+
+.
+ If forward selection halts on stage 
+\begin_inset Formula $l^{k}$
+\end_inset
+
+ based on stopping rule 
+\begin_inset Formula $\epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}$
+\end_inset
+
+, we must have 
+\begin_inset Formula 
+\[
+\omega\geqslant\epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Standard
+Hence, we can reparametrize the stopping rule on 
+\begin_inset Formula $\left(Y^{k},X^{k}\right)$
+\end_inset
+
+ based on 
+\begin_inset Formula $\widehat{q}_{i}^{k}$
+\end_inset
+
+ as follows
+\end_layout
+
+\begin_layout Definition
+(the 
+\begin_inset Formula $\widetilde{q}$
+\end_inset
+
+ stopping rule) Assuming that the stopping rule 
+\begin_inset Formula $\epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}$
+\end_inset
+
+ terminate the forward selection at stage 
+\begin_inset Formula $l^{k}$
+\end_inset
+
+ on subsample 
+\begin_inset Formula $\left(Y^{k},X^{k}\right)$
+\end_inset
+
+, 
+\end_layout
+
+\begin_layout Itemize
+we denote 
+\begin_inset Formula 
+\[
+\widetilde{q}^{k}=\frac{\widetilde{p}+1-l^{k}}{\widetilde{p}},
+\]
+
+\end_inset
+
+
+\end_layout
+
+\begin_layout Itemize
+we define an equivalent stopping criterion as 
+\begin_inset Quotes eld
+\end_inset
+
+the forward selection only selects that variable with 
+\begin_inset Formula $\widehat{q}_{i}^{k}>\widetilde{q}^{k}$
+\end_inset
+
+ 
+\begin_inset Quotes erd
+\end_inset
+
+,
+\end_layout
+
+\begin_layout Itemize
+we define 
+\begin_inset Formula 
+\[
+\omega=\left|\left\langle \mathbf{x}^{\left(l^{k}-1\right)},u^{\left(l^{k}-1\right)}\right\rangle \right|>\epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)},
+\]
+
+\end_inset
+
+where where 
+\begin_inset Formula $u^{\left(l^{k}-1\right)}$
+\end_inset
+
+ is the regression residual of stage 
+\begin_inset Formula $l^{k}-1$
+\end_inset
+
+ and 
+\begin_inset Formula $\mathbf{x}^{\left(l^{k}-1\right)}$
+\end_inset
+
+ is the variable selected at stage 
+\begin_inset Formula $l^{k}-1$
+\end_inset
+
+.
+ 
+\end_layout
+
+\begin_layout Standard
+Based on Definition 1, we can reparametrize Lemma 1 into Lemma 2.
+\end_layout
+
+\begin_layout Lemma
+Consider the forward regression algorithm on the 
+\begin_inset Formula $k$
+\end_inset
+
+th subsample 
+\begin_inset Formula $\left(Y^{k},X^{k}\right)$
+\end_inset
+
+ with Assumption 1 satisfied.
+ With probability larger than 
+\begin_inset Formula $1-\eta$
+\end_inset
+
+, if the forward selection only selects variables with 
+\begin_inset Formula $\widehat{q}_{i}^{k}>\widetilde{q}^{k}$
+\end_inset
+
+,
+\begin_inset Formula 
+\[
+\omega>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}
+\]
+
+\end_inset
+
+ and 
+\begin_inset Formula 
+\[
+\min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+\]
+
+\end_inset
+
+then 
+\begin_inset Formula 
+\[
+\overline{F}=\left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>\widetilde{q}^{k}\right\} ,
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is defined at Definition 1.
+\end_layout
+
+\begin_layout Standard
+Note that we replace 
+\begin_inset Formula $n$
+\end_inset
+
+ with 
+\begin_inset Formula $n\left(K-1\right)/K$
+\end_inset
+
+ since each subsample randomly drops 
+\begin_inset Formula $1/K$
+\end_inset
+
+ of original sample points at Algorithm 1.
+ 
+\end_layout
+
+\begin_layout Subsection
+Step 2 : averaging performance
+\end_layout
+
+\begin_layout Standard
+Since we assume the nonzero 
+\begin_inset Formula $\overline{\beta}_{i}$
+\end_inset
+
+ are the first 
+\begin_inset Formula $p_{1}$
+\end_inset
+
+ components of 
+\begin_inset Formula $\overline{\beta}$
+\end_inset
+
+, Lemma 2 can be rewritten as 
+\end_layout
+
+\begin_layout Lemma
+Consider the forward regression algorithm on the 
+\begin_inset Formula $k$
+\end_inset
+
+th subsample 
+\begin_inset Formula $\left(Y^{k},X^{k}\right)$
+\end_inset
+
+ with Assumption 1 satisfied.
+ With probability less than 
+\begin_inset Formula $\eta$
+\end_inset
+
+, if the forward selection only selects variables with 
+\begin_inset Formula $\widehat{q}_{i}^{k}>\widetilde{q}^{k}$
+\end_inset
+
+,
+\begin_inset Formula 
+\[
+\omega>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}
+\]
+
+\end_inset
+
+ and 
+\begin_inset Formula 
+\[
+\min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+\]
+
+\end_inset
+
+then 
+\begin_inset Formula 
+\[
+\begin{cases}
+\widehat{q}_{i}^{k}\leqslant\widetilde{q}^{k},\forall i\leqslant p_{1}\\
+\widehat{q}_{i}^{k}>\widetilde{q}^{k},\forall i>p_{1}
+\end{cases}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is defined at Definition 1.
+\end_layout
+
+\begin_layout Standard
+We can directly bounding the probability and generate the Lemma 3
+\end_layout
+
+\begin_layout Lemma
+Consider the forward selection algorithm on the average 
+\begin_inset Formula $L_{0}$
+\end_inset
+
+ path with Assumption 1 satisfied.
+ With probability less than 
+\begin_inset Formula $\eta$
+\end_inset
+
+, if the forward selection only selects variables with 
+\begin_inset Formula $\widehat{q}_{i}^{k}>\widetilde{q}^{k}$
+\end_inset
+
+,
+\begin_inset Formula 
+\[
+\omega>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4Kp/\eta\right)}
+\]
+
+\end_inset
+
+ and 
+\begin_inset Formula 
+\[
+\min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+\]
+
+\end_inset
+
+then 
+\begin_inset Formula 
+\[
+\begin{cases}
+\frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}>\widetilde{q}^{*},\forall i\leqslant p_{1}\\
+\frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}\leqslant\widetilde{q}^{k},\forall i>p_{1}
+\end{cases}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $\omega$
+\end_inset
+
+ is defined at Definition 1.
+\end_layout
+
+\begin_layout Subsection
+Step 3 : feature selection consistency
+\end_layout
+
+\begin_layout Theorem
+Consider the forward selection algorithm on the average 
+\begin_inset Formula $L_{0}$
+\end_inset
+
+ path with Assumption 1 satisfied, noise 
+\begin_inset Formula $\sigma$
+\end_inset
+
+ independent of 
+\begin_inset Formula $n$
+\end_inset
+
+.
+ Assume that the strong irrepresentable condition holds.
+ For each problem of sample size n, denote 
+\begin_inset Formula $F\left(n\right)$
+\end_inset
+
+ as the index set of selected variables when forward selection stops with
+ 
+\begin_inset Formula $\omega\geqslant n^{s/2}$
+\end_inset
+
+, 
+\begin_inset Formula $\forall s\in(0,1]$
+\end_inset
+
+ , and 
+\begin_inset Formula $\overline{F}\left(n\right)$
+\end_inset
+
+ as the correpsonding index set of informative variables.
+ We have 
+\begin_inset Formula 
+\[
+Pr\left(\;F\left(n\right)\neq\overline{F}\left(n\right)\;\right)\leqslant\exp\left(-\frac{n^{s}}{\log\left(n\right)}\right)
+\]
+
+\end_inset
+
+ if
+\begin_inset Formula 
+\[
+p\left(n\right)\leqslant\exp\left(\frac{n^{s}}{\log\left(n\right)}\right),
+\]
+
+\end_inset
+
+and 
+\begin_inset Formula 
+\[
+\min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3n^{(s-1)/2}}{\rho_{X}\left(\overline{F}\left(n\right)\right)}
+\]
+
+\end_inset
+
+where 
+\begin_inset Formula $p\left(n\right)$
+\end_inset
+
+ is the total dimension of variable as 
+\begin_inset Formula $n$
+\end_inset
+
+ increases, 
+\end_layout
+
+\end_body
+\end_document

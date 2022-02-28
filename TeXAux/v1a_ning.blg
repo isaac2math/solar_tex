@@ -4,44 +4,46 @@ The top-level auxiliary file: v1a_ning.aux
 The style file: elsarticle-harv.bst
 Database file #1: ref/CVrefs.bib
 Reallocated singl_function (elt_size=4) to 100 items from 50.
-You've used 33 entries,
+Warning--empty journal in draper1966applied
+You've used 39 entries,
             2990 wiz_defined-function locations,
-            825 strings with 10372 characters,
-and the built_in function-call counts, 22873 in all, are:
-= -- 1749
-> -- 898
-< -- 19
-+ -- 356
-- -- 312
-* -- 2521
-:= -- 3303
-add.period$ -- 97
-call.type$ -- 33
-change.case$ -- 263
-chr.to.int$ -- 32
-cite$ -- 33
-duplicate$ -- 1686
-empty$ -- 1687
-format.name$ -- 423
-if$ -- 4242
+            859 strings with 11315 characters,
+and the built_in function-call counts, 26374 in all, are:
+= -- 2033
+> -- 982
+< -- 25
++ -- 393
+- -- 339
+* -- 2849
+:= -- 3809
+add.period$ -- 113
+call.type$ -- 39
+change.case$ -- 302
+chr.to.int$ -- 38
+cite$ -- 40
+duplicate$ -- 1966
+empty$ -- 1981
+format.name$ -- 462
+if$ -- 4914
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 330
-newline$ -- 178
-num.names$ -- 132
-pop$ -- 600
+missing$ -- 378
+newline$ -- 206
+num.names$ -- 156
+pop$ -- 703
 preamble$ -- 1
-purify$ -- 232
+purify$ -- 265
 quote$ -- 0
-skip$ -- 472
+skip$ -- 568
 stack$ -- 0
-substring$ -- 1121
-swap$ -- 1229
-text.length$ -- 3
+substring$ -- 1326
+swap$ -- 1399
+text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 291
-warning$ -- 0
-while$ -- 156
+type$ -- 345
+warning$ -- 1
+while$ -- 184
 width$ -- 0
-write$ -- 471
+write$ -- 550
+(There was 1 warning)
