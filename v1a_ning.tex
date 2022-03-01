@@ -26,7 +26,7 @@
 
 \begin{abstract}
   %
-  We propose a new algorithm for variable selection in high dimensional and large scale data, \emph{subsample-ordered least-angle regression (solar)}, and a coordinate descent generalization, \emph{solar-cd}. \hl{We show that the solar variable selection consistency and the variable ranking accuracy on the avergae $L_0$ path under the general framework of forward selection.} Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, without any increase in computation load, substantial improvements over lasso in terms of the sparsity (37-64\% reduction in redundant variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the efficiency and accuracy of post-selection inference; and (iv) replacing lasso with solar in subsampling selection (e.g., the bootstrap lasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity, ranking accuracy, and computation load (a saving of at least 96\% in runtime, exceeding the theoretical maximum speedup for parallelizing lasso-type algorithms). Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easy to adapt to lasso variants. In a supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}, we provide a parallel computing package for solar (solarpy) that uses a Python interface and an Intel MKL Fortran/C++ compiler.
+  We propose a new algorithm for variable selection in high dimensional and large scale data, \emph{subsample-ordered least-angle regression (solar)}, and a coordinate descent generalization, \emph{solar-cd}. We show solar variable selection consistency and variable ranking accuracy on the average $L_0$ path under the general framework of forward selection. Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, without any increase in computation load, substantial improvements over lasso in terms of the sparsity (37-64\% reduction in redundant variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the efficiency and accuracy of post-selection inference; and (iv) replacing lasso with solar in subsampling selection (e.g., the bootstrap lasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity, ranking accuracy, and computation load (a saving of at least 96\% in runtime, exceeding the theoretical maximum speedup for parallelizing lasso-type algorithms). Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easy to adapt to lasso variants. In a supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}, we provide a parallel computing package for solar (solarpy) that uses a Python interface and an Intel MKL Fortran/C++ compiler.
   %
 \end{abstract}
 
@@ -56,47 +56,15 @@ Data-splitting hypothesis tests are another way to screen variables selected by 
 
 Specifically designed to address the challenges of high dimensional data, the variable screening algorithm \citep{fan2008sure, hall2009using,hall2009usingb, li2012robust, li2012feature} ranks the absolute values of unconditional correlations between each covariate and the response variable, selecting only the top-ranked variables. However, \citet{fan2008sure}, \citet{barut2016conditional}, and Section~\ref{section:example} below show that variable screening also suffers from selection of redundant variables and rejection of informative variables when the dependence structures are complicated.
 
-\begin{figure}[ht]
-  %
-    \centering
-  %
-    \includegraphics[width=0.66\paperwidth]{intro1.pdf}
-  %
-    \caption{Statistical and computational comparisons between group lasso (coordinate descent) and the forward selection with $n = 200, p = 4000$.}
-  %
-    \label{fig:intro1}
-  %
-\end{figure}
-
-\begin{figure}[ht]
-  %
-    \centering
-  %
-    \includegraphics[width=0.55\paperwidth]{intro2.pdf}
-  %
-    \caption{Statistical and computational comparisons between fused lasso and forward selection on image denoising.}
-  %
-    \label{fig:intro2}
-  %
-\end{figure}
-
-\hl{Research has studied forward selection (stagewise or stepwise) thoroughly and established various statistical properties under different assumptions} \citep{efroymson1966stepwise, draper1966applied, friedman2001elements}. According to \citet{friedman2001elements, weisberg04}, \hl{forward selection was historically dismissed due to inefficiency and sensitivity to sampling randomness, multicollinearity, noise and outliers in high-dimensional spaces due to the iterative refitting of the residual. However,} \citet{tibshirani2015general} \hl{illustrates that, from a modern perspective, forward selection can present considerable benefits in terms of the generalization error of the fitted models (not only in regression, but across variety of settings). Furthermore, forward selection is computationally cheap by modern standards: to trace out a path of regularized estimates, we repeat very simple iterations (each requiring at most $p$ inner products) that could be trivially parallelized.} \citet{tibshirani2015general} \hl{illustrates his point in a number of large-scale applications. We summarize two of them in Figure}~\ref{fig:intro1} and \ref{fig:intro2}.
-%
-\begin{itemize}
-  %
-  \item With $n = 200, p = 4000$, the top row of Figure~\ref{fig:intro1} \hl{shows that forward selection can achieve competitive mean squared errors to that of group lasso under two different setups for the predictors in group lasso regression: uncorrelated and block correlated. (The curves were averaged over 10 simulations, with standard deviations denoted by dotted lines.) The lower table reports runtimes in seconds (averaged over 10 simulations, with standard deviations in parentheses) for the various algorithms considered, and shows that the stagewise algorithm represents a computationally attractive alternative to the coordinate descent approach and the Frank-Wolfe algorithm.}
-  %
-  \item Figure~\ref{fig:intro2} \hl{compares between fused lasso and forward selection on image denoising. The true underlying $300 \times 200$ image is displayed in the middle of the top row. Over 10 noisy pertubations of this underlying image, with one such example shown in the right plot of the top row, we compare averaged mean squared errors of the exact solutions and stagewise estimates, in the left plot of the top row. Average timings for these methods are given in the bottom table. (Standard deviations are denoted by dotted lines in the error plots, and are in parentheses in the table.) The stagewise estimates have competitive mean squared errors and are fast to compute.}
-  %
-\end{itemize}
+According to \citet{friedman2001elements, weisberg04}, forward selection \citep{efroymson1966stepwise, draper1966applied} was historically dismissed in high-dimensional spaces due to inefficiency and sensitivity to sampling randomness, multicollinearity, noise, and outliers due to the iterative refitting of the residual. \citet{tibshirani2015general} illustrates through simulation that, \hl{compared with lasso-type estimators, forward selection may produce a competitive generalization error} of fitted models in some applications. \citet{tibshirani2015general} \hl{also illustrates that forward selection is computationally competitive to lasso in some applications (image denoising, matrix completion, etc)}. However, \citet{tibshirani2015general} does not suggest a solution of the sensitivity to sampling randomness, multicollinearity, noise, and outliers.
 
 \subsection{Main results}
 
-\hl{To address the issues above while boosting the forward selection advantages, we propose a new forward selection algorithm}, \emph{subsample-ordered least-angle regression (solar)}, and its coordinate-descent generalization, \emph{solar-cd}. Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easily adaptable to many lasso variants. \hl{We show that the solar variable selection consistency and the variable ranking accuracy on the avergae $L_0$ path under the general framework of forward selection.}
+To address these issues, we propose a new forward selection algorithm, \emph{subsample-ordered least-angle regression (solar)}, and its coordinate-descent generalization, \emph{solar-cd}. Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easily adaptable to many lasso variants. We prove $L_0$ path ranking accuracy and variable selection consistency under the \citet{zhang09} general framework of forward selection.
 
 Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, without any increase in computation load, substantial improvements over lasso in terms of the sparsity (37-64\% reduction in redundant variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the efficiency and accuracy of post-selection inference; (iv) replacing lasso with solar in subsampling selection (e.g., the bootstrap lasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity, ranking accuracy, and computation load (a saving of at least 96\% in runtime, exceeding the theoretical maximum speedup for parallelizing lasso-type algorithms). We provide a parallel computing package for solar (\texttt{solarpy}) that uses a Python interface and an Intel MKL Fortran/C++ compiler in a supplementary file and dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
 
-The paper is organized as follows. In Section~\ref{section:algo}, we introduce the solar algorithm, explain the coordinate descent generalization of solar, and discuss generalizations of solar to variants of lasso. In Section~\ref{section:adv}, we use examples to demonstrate the advantages of solar over lasso, the safe/strong rules, variable screening, forward regression, and lasso-related bootstrap selection. In Section~\ref{section:comp}, we use simulations to demonstrate the advantages of solar over lasso-type algorithms in terms of variable selection sparsity, accuracy, and computation load. In Section~\ref{section:application}, we use real-world data to show that the improvements from solar are feasible in the presence complicated dependence structures, while lasso and elastic net [the lasso variant alleged \citep{zou2005regularization, jia2010model} to have the best selection accuracy and sparsity under multicollinearity] completely lose sparsity. \hl{The solar variable selection consistency and the variable ranking accuracy are included in Appendix A. The code and raw result of solarpy is in Supplementary Material.}
+The paper is organized as follows. In Section~\ref{section:algo}, we introduce the solar algorithm, explain the coordinate descent generalization of solar, and discuss generalizations of solar to variants of lasso. In Section~\ref{section:adv}, we use examples to demonstrate the advantages of solar over lasso, the safe/strong rules, variable screening, forward regression, and lasso-related bootstrap selection. In Section~\ref{section:comp}, we use simulations to demonstrate the advantages of solar over lasso-type algorithms in terms of variable selection sparsity, accuracy, and computation load. In Section~\ref{section:application}, we use real-world data to show that the improvements from solar are feasible in the presence complicated dependence structures, while lasso and elastic net [the lasso variant alleged \citep{zou2005regularization, jia2010model} to have the best selection accuracy and sparsity under multicollinearity] completely lose sparsity. The proofs of $L_0$ path ranking accuracy and variable selection consistency are in Appendix A. The solarpy code and raw simulation results are in the Supplementary Material.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% SECTION 2 %%%%%%
@@ -184,7 +152,7 @@ After the subsamples are created, lines~\ref{inner_averaging_start}-\ref{inner_a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The solar algorithm is summarized in Algorithm~\ref{algo:solar}. It is presented under the generic framework of forward regression and can easily be adapted to least angle regression, forward or backward selection algorithms. \hl{Under the general framework of forward selection by} \citet{zhang09}, \hl{we show in Appendix~A that the solar variable selection consistency and the variable ranking accuracy on the avergae $L_0$ path.}
+The solar algorithm, summarized in Algorithm~\ref{algo:solar}, is presented under the generic framework of forward regression and can easily be adapted to least angle regression, forward or backward selection algorithms. Using the \citet{zhang09} framework, we prove solar variable selection consistency and variable ranking accuracy on the average $L_0$ path (see Appendix~A).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -740,7 +708,7 @@ Table~\ref{table:sim_load} shows the average runtime for the simulations. Bsolar
 
 \subsubsection{Comparison with previous lasso computation research}
 
-The bolasso findings \hl{is consistent with} \citet{tibshirani2015general}, further confirming with previous research on lasso. Given the same convergence criteria (tolerance for optimization and maximum number of iterations), number of folds for CV ($K=10$), and number of $\lambda$s in the grid search (100), the time complexity of lasso is mostly determined by $n$, $p$, and pairwise correlations among the covariates ($corr$). For the purposes of comparison, we consider a Gaussian regression with $p/n=1000/100$ and $corr=0.5$.
+\hl{The bolasso findings are consistent with earlier research on lasso}. Given the same convergence criteria (tolerance for optimization and maximum number of iterations), number of folds for CV ($K=10$), and number of $\lambda$s in the grid search (100), the time complexity of lasso is mostly determined by $n$, $p$, and pairwise correlations among the covariates ($corr$). For the purposes of comparison, we consider a Gaussian regression with $p/n=1000/100$ and $corr=0.5$.
 
 \begin{itemize}
   %
@@ -751,9 +719,9 @@ The bolasso findings \hl{is consistent with} \citet{tibshirani2015general}, furt
 \end{itemize}
 
 \noindent
-Thus, with similar CPU frequency and 14 additional cores, our implementation produces an average speedup of $0.07/0.014=5$ times over \citet{friedman2010regularization} for each pathwise coordinate descent repetition. 
+Thus, with a similar CPU frequency and 14 additional cores, our implementation produces an average speedup of $0.07/0.014=5$ times over \citet{friedman2010regularization} for each pathwise coordinate descent repetition.
 
-\hl{Given the CPU core number and frequencies, our speedup almost reaches the theoretical maximum. To confirm this point, we calculate the theoretical maximum speedup from 2 to 16 cores using Amdahl's law.} \citet{friedman2010regularization} \hl{and our code apply the same desgin to cross-validated lasso. Both require 10 pathwise coordinate descent repetitions to optimize $\lambda$ and, based on the results of the first 10, one extra to compute $\beta$. Thus, approximately 11\% of the total computations (including 1 of the 11 pathwise coordinate descent repetitions, data generation, matrix manipulation, I/O, code interpretation to C++/Fortran, etc.) is not parallelizable.} With a given computation load ($n$ and $p$), according to Amdahl's law the maximum speedup is:
+This speedup almost reaches the theoretical maximum speedup from 2 to 16 cores predicted by Amdahl's law. Our code and that of \citet{friedman2010regularization} apply the same design to cross-validated lasso: 10 (parallelizable) pathwise coordinate descent repetitions to optimize $\lambda$ followed by a final (non-parallelizable) step to compute $\beta$. Roughly 11\% of the total computations (I/O, code interpretation to C++/Fortran, data generation, etc., matrix manipulation, and the step to compute $\beta$) are not parallelizable. Given $n$ and $p$, the maximum speedup according to Amdahl's law is:
 %
 \begin{equation}
   %
@@ -761,7 +729,7 @@ Thus, with similar CPU frequency and 14 additional cores, our implementation pro
   %
 \end{equation}
 %
-where $\rho$ is the proportion of computation that is not parallelizable and $s$ is the computation speedup for the parallelizable proportion (e.g., the core number multiple). Given that our CPU base frequency is also higher than \citet[Table 1]{friedman2010regularization} ($3.2$GHz over $2.8$GHz), we adjust the maximum speedup by the frequency multiple ($3.2/2.8$), resulting in a final maximum speedup of \hl{$4.5 \times 3.2/2.8 \approx 5.2$, or 4\% faster than our speedup. Thus, our coordinate descent bolasso package achieves almost 96\% of the maximum possible speedup, implying little room for further parallelization improvements.}
+where $\rho$ is the proportion of computation that is not parallelizable and $s$ is the computation speedup for the parallelizable proportion (i.e., the core number multiple). Given that our CPU base frequency is also higher than \citet[Table 1]{friedman2010regularization} ($3.2$GHz over $2.8$GHz), we adjust the maximum speedup by the frequency multiple ($3.2/2.8$), resulting in a final maximum speedup of $4.5 \times 3.2/2.8 \approx 5.2$, or 4\% faster than our speedup. Thus, our coordinate descent bolasso package achieves almost 96\% of the maximum possible speedup, implying little room for further parallelization improvements.
 
 \begin{figure}[ht]
   %
@@ -969,9 +937,7 @@ Detection of weak signals is a potential weakness evident in solar, although rel
 \begin{appendices}
 \section{$L_0$ path ranking accuracy and variable selection consistency}
 
-For generality, we derive the solar theoretical properties under the general framework of forward selection by \citet{zhang09}. Our proof method is summarized as follows. For various settings and assumptions, \citet{tropp2004greed}, \citet{yuan2007non}, \citet{wainwright2009sharp}, \citet{zhang09}, and \citet{ing2011stepwise} have shown: (i) forward selection is variable selection consistent in different modes, and (ii) informative variables are ranked at earlier stages of the solution path than redundant variables. Since the $L_0$ path on each solar subsample is essentially the re-parameterized forward selection path, (i) and (ii) can be applied directly to the $L_0$ path on each solar subsample. As a result, we can build a probabilistic lower bound to show that, on average, (i) and (ii) also hold for the average $L_0$ path and the variable selection result on the average $L_0$ path (including solar variable selection). While we follow the methods of \citet{tropp2004greed}, \citet{wainwright2009sharp}, and \citet{zhang09}, due to their alignment and direct comparison to the $L_0$ and $L_2$ consistency of lasso-type estimators, our proof method is compatible to other forward selection results.
-
-We adopt the notation from \citet{zhang09} as follows:
+For generality, we derive the theoretical properties of solar under the general forward selection framework of \citet[Figure~1]{zhang09}. Our proof method is summarized as follows. Under various settings and assumptions, \citet{tropp2004greed}, \citet{yuan2007non}, \citet{wainwright2009sharp}, \citet{zhang09}, and \citet{ing2011stepwise} have shown: (i) forward selection is consistent in different modes, and (ii) informative variables are ranked higher at earlier stages of the solution path than redundant variables. Since the $L_0$ path on each solar subsample is essentially the re-parameterized forward selection path, (i) and (ii) can be applied directly to the $L_0$ path on each solar subsample. As a result, we can build a probabilistic lower bound to show that, on average, (i) and (ii) also hold for the average $L_0$ path and for the variable selection result on the average $L_0$ path (including solar variable selection). \hl{We follow the methods of} \citet{tropp2004greed}, \citet{wainwright2009sharp}, and \citet{zhang09}, \hl{since their assumptions and analysis methods are similar to the theoretical analysis of lasso-type estimators.} We follow the \citet{zhang09} notation.
 
 \begin{definition}
   Consider the regression model $Y = X\beta + \mathbf{e}$, \label{def:notation}
@@ -979,20 +945,20 @@ We adopt the notation from \citet{zhang09} as follows:
 %
 \begin{enumerate}
   %
+  \item     $Y = \left[ y_1, \ldots, y_n \right]^T \in \mathbb{R}^{n \times 1}$ is the response variable.
+
+  \item     The data matrix is $X = \left[ \mathbf{x}_1, \ldots,\mathbf{x}_p \right] \in \mathbb{R}^{n \times p}$ with columns $\mathbf{x}_j \in \mathbb{R}^{n \times 1}$, $\forall j=1,\ldots,p$, and rows $ X_{i,\bigcdot} \in \mathbb{R}^{1 \times p}$, $\forall i = 1,\ldots,n$. $\mathbf{e}\in \mathbb{R}^{n\times 1}$ is a stochastic noise term.
+  %
   \item     The regression coefficients of the data generating process (DGP) are $\overline{\beta} = \left[\,\overline{\beta}_1, \ldots, \overline{\beta}_{p_1}, \mathbf{0} \right]^T \in \mathbb{R}^{p\times 1}$, where the first $p_1$ entries are not $0$.
   %
-  \item     $Y = \left[ y_1, \ldots, y_n \right]^T \in \mathbb{R}^{n \times 1}$ is the response variable. 
-  
-  \item     The data matrix is $X = \left[ \mathbf{x}_1, \ldots,\mathbf{x}_p \right] \in \mathbb{R}^{n \times p}$ with columns $\mathbf{x}_j \in \mathbb{R}^{n \times 1}$, $\forall j=1,\ldots,p$ \; and rows $ X_{i,\bigcdot} \in \mathbb{R}^{1 \times p}$, $\forall i = 1,\ldots,n$. $\mathbf{e}\in \mathbb{R}^{n\times 1}$ is the stochastic noise.
-  %
-  \item     The support, $\forall \beta \in \mathbb{R}^{p \times 1}$, is $\mathrm{supp}(\beta) = \{ j : \beta_j \neq 0 \} $
+  \item     The support, $\forall \beta \in \mathbb{R}^{p \times 1}$, is $\mathrm{supp}(\beta) = \{ j : \beta_j \neq 0 \} $.
   %
   \item     Given $X \in \mathbb{R}^{n \times p}$ and $F \subset \left\{1, \ldots, p \right\}$,
   %
   \begin{displaymath}
     %
     \widehat{\beta}_{X} \left( F,Y \right) =
-    \mathrm{argmin}_{ \beta \in \mathbb{R}^d} \;\;
+    \mathrm{argmin}_{ \beta \in \mathbb{R}^{p \times 1}} \;\;
     \frac{1}{n}\left\Vert X\beta - Y\right\Vert_{2}^{2}
     \quad\mbox{subject to}\quad \mathrm{supp}(\beta)\subset F.
     %
@@ -1000,9 +966,9 @@ We adopt the notation from \citet{zhang09} as follows:
   %
   That is, $\widehat{\beta}_{X}\left(F,Y\right)$ is the least squares solution with coefficients restricted to $F$.
   %
-  \item $\left\vert F \right\vert$ is the cardinality of $F$ and $\overline{F}-F$ is the difference of sets $\overline{F}$ and $F$.
+  \item $\left\vert F \right\vert$ is the cardinality of $F$ while $\overline{F}-F$ is the difference of sets $\overline{F}$ and $F$.
   %
-  \item $X_F$ is the $n \times \left\vert F \right\vert$ matrix, whose columns are $\mathbf{x}_j \in \left[ \mathbf{x}_0, \ldots \mathbf{x}_p \right]$ with $j\in F$ arranged in the ascending order.
+  \item $X_F$ is an $n \times \left\vert F \right\vert$ matrix with columns $\mathbf{x}_j \in \left[ \mathbf{x}_0, \ldots \mathbf{x}_p \right]$ with $j\in F$ arranged in ascending order.
   %
   \item To introduce the irrepresentable condition and sparse eigenvalue condition, define
   %
@@ -1020,16 +986,16 @@ We adopt the notation from \citet{zhang09} as follows:
     %
   \end{displaymath}
   %
-  \item (the $\epsilon$ stopping rule) The forward selection algorithm we dicuss is also referred to as orthogonal matching pursuit (OMP) and presented at \citet[Figure~1]{zhang09}. Its stopping rule is denoted by $\epsilon$. Prior to stage $l$, forward selection finds the unselected variable
+  \item (The $\epsilon$ stopping rule.) The \citet[Figure~1]{zhang09} framework is also known as orthogonal matching pursuit (OMP). Prior to stage $l$, forward selection finds the unselected variable
   %
   \begin{displaymath}
     %
     \mathbf{x}^{(l)} = \mathrm{argmax}_{\mathbf{x}_j} \;\; \left\vert \mathbf{x}_j^T u^{(l-1)} \right\vert, \\
-    \quad\mbox{for all unselected}\quad\mathbf{x}_{j},
+    \quad\mbox{for all unselected }\mathbf{x}_{j},
     %
   \end{displaymath}
   %
-  where $u^{\left(l-1\right)}$ is the forward regression residual of stage $l-1$. If the maximum value $\geqslant\epsilon$, the forward selection loop will select $\mathbf{x}^{(l)}$, compute $u^{(l)}$ and move on to stage $l+1$; otherwise, the forward selection loop will stop and report the regression coefficients and the selected variables on and before stage $l-1$.
+  where $u^{\left(l-1\right)}$ is the forward regression residual of stage $l-1$. If $\left\vert (\mathbf{x}^{(l)})^T u^{(l-1)} \right\vert > \epsilon$, the forward selection loop will select $\mathbf{x}^{(l)}$, compute $u^{(l)}$ and move to stage $l+1$; otherwise, the forward selection loop will stop and report the regression coefficients and selected variables on and before stage $l-1$.
 \end{enumerate}
 
 We also adopt the \citet{zhang09} assumptions:
@@ -1038,25 +1004,26 @@ We also adopt the \citet{zhang09} assumptions:
   %
   \item [{[}A1{]}] each $\mathbf{x}_i$ is normalized such that $\left\Vert \mathbf{x}_{j}\right\Vert _{2}^{2}/n=1,\;\forall j=1,\ldots,p$;
   %
-  \item [{[}A2{]}] the $\overline{\beta}$ is sparse : $\exists \overline{\beta} \in \mathbb{R}^{p\times 1}$ with $\overline{F} = \mathrm{supp} \left( \overline{\beta} \right)$ such that $ \mathbf{E} \left( Y \right) = X\overline{\beta} = \left[ X_{1,\bigcdot} \; \overline{\beta}, \;  \ldots, \; X_{n,\bigcdot} \; \overline{\beta} \right]^T$;
+  \item [{[}A2{]}] the $\overline{\beta}$ is sparse: $\exists \overline{\beta} \in \mathbb{R}^{p\times 1}$ with $\overline{F} = \mathrm{supp} \left( \overline{\beta} \right)$ such that $ \mathbf{E} \left( Y \right) = X\overline{\beta} = \left[ X_{1,\bigcdot} \; \overline{\beta}, \;  \ldots, \; X_{n,\bigcdot} \; \overline{\beta} \right]^T$;
   %
   \item [{[}A3{]}] the irrepresentable condition \citep{tropp2004greed}: $\mu_{X}\left(\overline{F}\right)<1$; the sparse eigenvalue condition \citep{wainwright2009sharp}: $\rho_{X}\left(\overline{F}\right)>0$.
   %
-  \item [{[}A4{]}] $\exists \sigma > 0$ such that $Y = \left[ Y_1, \ldots, Y_n \right]$ are independent (but not necessarily identically distributed) sub-Gaussians with $\mathbb{E} \left(Y_i\right)=  X_{i,\bigcdot} \; \overline{\beta}$ and $\mathbb{E}_{Y_i} \left( e^{t\left(Y_i - \mathbb{E} \left( Y_i \right) \right)}\right) \leqslant e^{\sigma^2t^2/2}$, $\forall t\in \mathbb{R}$ and $\forall i\in \left\{1,\ldots,n\right\}$.
+  \item [{[}A4{]}] there exists a $ \sigma > 0$ such that $Y = \left[ Y_1, \ldots, Y_n \right]$ are independent (but not necessarily identically distributed) sub-Gaussians with $\mathbb{E} \left(Y_i\right)=  X_{i,\bigcdot} \; \overline{\beta}$ and $\mathbb{E}_{Y_i} \left( e^{t\left(Y_i - \mathbb{E} \left( Y_i \right) \right)}\right) \leqslant e^{\sigma^2t^2/2}$, $\forall t\in \mathbb{R}$ and $\forall i\in \left\{1,\ldots,n\right\}$.
 \end{description}
-%
-\textbf{A4} implies that $Y$ can be either unbounded or bounded. \textbf{A2} and \textbf{A4} imply that the regression noise in DGP $\left[e_1, \ldots, e_n\right]^T$ are independent sub-Gaussians.
 
-The proof for variable selection accuracy and variable ranking accuracy is specified in the following steps.
+\textbf{A4} implies that $Y$ can be either bounded or unbounded. \textbf{A2} and \textbf{A4} imply that the regression noise in the DGP, $\left[e_1, \ldots, e_n\right]^T$, are independent sub-Gaussians.
+
+The proof of variable selection accuracy and variable ranking accuracy is specified in the following steps.
 
 %%%%%%%%% step 1 %%%%%%%%%
 
-\subsection*{Step 1 : reparametrize $\epsilon$ stopping rule via $\widehat{q}^k$ }
+\subsection*{Step 1 : re-parameterize the $\epsilon$ stopping rule via $\widehat{q}^k$ }
 
-We firstly introduce the theoretical result of \citet[Theorem 1]{zhang09}, which shows that, for a general forward selection on a finite sample, the probability of omitting informative variables are under control. 
+\citet[Theorem 1]{zhang09} shows that the probability of omitting informative variables is bounded on a finite sample.
 %
 \begin{theorem}
   %
+  \label{theoremA1}
   \citep{zhang09} Consider the forward selection algorithm with Assumption 1 satisfied. Given any $\eta \in \left( 0, 1 \right)$, with probability larger than $1 - \eta$, if the $\epsilon$  stopping criterion stops forward selection at stage $l$, satisfying
   %
   \begin{equation}
@@ -1073,7 +1040,7 @@ We firstly introduce the theoretical result of \citet[Theorem 1]{zhang09}, which
     %
   \end{equation}
   %
-  then when the procedure stops at stage $l$, 
+  then when the procedure stops at stage $l$,
   %
   \begin{equation}
     %
@@ -1085,15 +1052,15 @@ We firstly introduce the theoretical result of \citet[Theorem 1]{zhang09}, which
   %
 \end{theorem}
 
-As shown in the Definition~\ref{def:notation}, \citet{zhang09} executes each forward selection stage based on $\epsilon$. By constrast, we reparametrize forward selection stages (in Algorithm 1) and its stopping rule (in Algorithm 2) using different values of $\widehat{q}$. Given the assumption $\epsilon > \frac{1}{1-\mu_X \left( \overline{F} \right)} \sigma\sqrt{ 2 \ln \left( 4p / \eta \right)}$, we can find an equivalent stopping criterion based on $\widehat{q}$ as follows, 
+As shown in Definition~\ref{def:notation}, \citet{zhang09} executes each forward selection stage using $\epsilon$. By contrast, we re-parameterize forward selection stages (in Algorithm 1) and the stopping rule (in Algorithm 2) using $\widehat{q}$. Given the assumption $\epsilon > \frac{1}{1-\mu_X \left( \overline{F} \right)} \sigma\sqrt{ 2 \ln \left( 4p / \eta \right)}$, we can find an equivalent stopping criterion based on $\widehat{q}$ as follows,
 
 \begin{itemize}
   %
   \item Assume that, on subsample $\left(Y^{k},X^{k}\right)$, $\epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}$ stops the forward selection at stage $l^{k}$;
   %
-  \item based on line 6 of Algorithm 1, all the variables selected before stage $l^{k}$ must have their $\widehat{q}_{i}^{k}$ values $>\left(\widetilde{p}+1-l^{k}\right)/\widetilde{p}$, where $\widetilde{p}$ is defined at line 2.
+  \item from line 6 of Algorithm 1, variables selected before stage $l^{k}$ must have $\widehat{q}_i^k$ values $> \left(\widetilde{p} + 1 - l^k \right) / \widetilde{p}$, where $\widetilde{p} = \min\left\{ n(K-1)/K, p\right\}$
   %
-  \item hence, on k\textsuperscript{th} subsample, the stopping rule 
+  \item hence, on the $k$\textsuperscript{th} subsample, the stopping rule
   %
   \begin{displaymath}
     %
@@ -1101,28 +1068,27 @@ As shown in the Definition~\ref{def:notation}, \citet{zhang09} executes each for
     %
   \end{displaymath}
   %
-  is equivlanet to the stopping rule
+  is equivalent to the stopping rule
   %
   \begin{displaymath}
     %
-    \mbox{the forward selection only selects the variables } \left\{ \mathbf{x}_j:\widehat{q}_j^k>\left(\widetilde{p}+1-l^k\right)/\widetilde{p}\right\}.
+    \mbox{forward selection only selects the variables } \left\{ \mathbf{x}_j:\widehat{q}_j^k>\left(\widetilde{p}+1-l^k\right)/\widetilde{p}\right\}.
     %
   \end{displaymath}
-  %
-  where $\widetilde{p} = \min\left\{ n(K-1)/K, p\right\}$
   %
 \end{itemize}
 \medskip
 
-\citet{zhang09} also assume that, when the forward selection stops at stage $l^k$ on subsample $\left(Y^{k},X^{k}\right)$, 
+\citet{zhang09} also assumes that, when forward selection stops at stage $l^k$ on subsample $\left(Y^{k},X^{k}\right)$,
 %
 \begin{displaymath}
   %
-  \epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}, \; \exists \eta \in \left(0, 1\right). 
+  \epsilon>\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)},
+  \;\exists\; \eta \in \left(0, 1\right).
   %
 \end{displaymath}
 %
-Such assumption plays a key role in theoretical analysis for the true signal recovery of forward selection or OMP. Since solar does not visualize $\epsilon$, we need to reparametrize such assumption before applying the same analysis method to solar algorithm. Specifically, let's denote 
+The assumption plays a key role for true signal recovery. Since solar does not explicitly use $\epsilon$, we need to re-parameterize the assumption before applying the \citet{zhang09} result. Specifically, denote
 %
 \begin{equation}
   %
@@ -1130,37 +1096,45 @@ Such assumption plays a key role in theoretical analysis for the true signal rec
   %
 \end{equation}
 %
-where $u^{\left( l^k \right)}$ is the regression residual of stage $l^k$ and $\mathbf{x}^{ \left( l^k \right)}$ is the variable selected at stage $l^k$. Solar selects variable on the $L_0$ and average $L_0$ paths based on $\widehat{q}^k$ and $\widehat{q}$. Hence, we can analysis the variable selection decision of solar by examining the absolute comovement between $u^{\left( l^k \right)}$ and $\mathbf{x}^{ \left( l^k \right)}$ on the $L_0$ path, which is identical to the $\epsilon$ assumption. This can be shown as follows.
+where $u^{\left( l^k \right)}$ is the regression residual and $\mathbf{x}^{ \left( l^k \right)}$ the variable selected at stage $l^k$. Solar selects variables on the $L_0$ and average $L_0$ paths based on $\widehat{q}^k$ and $\widehat{q}$. Hence, we can analyze the selection decisions of solar by examining the absolute co-movement between $u^{\left( l^k \right)}$ and $\mathbf{x}^{ \left( l^k \right)}$ on the $L_0$ path, which is identical to the $\epsilon$ assumption. This can be shown as follows.
 %
 \begin{itemize}
   %
-  \item Assume $\epsilon$ stopping rule stops forward selection at stage $l^k$ and $\epsilon > \frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}$. We must have 
+  \item Assume the $\epsilon$ stopping rule stops forward selection at stage $l^k$ and $\epsilon > \frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}$. We must have
   %
   \begin{equation}
     %
-    \omega^{\left(l^k - 1\right)} \geqslant \epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}
+    \omega^{\left(l^k - 1\right)} > \epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}
     %
   \end{equation}
-  Hence, stopping forward selection based on $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}$ implies 
+  Hence, stopping forward selection based on $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ implies
   \begin{displaymath}
-    \omega^{\left(l^k - 1\right)} \geqslant \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}.
+    \omega^{\left(l^k - 1\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}.
   \end{displaymath}
   %
-  \item If $\omega^{\left(\bigcdot\right)} \geqslant \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}$ is not violated until stage $l^k$ and $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}$, it implies that $\omega^{\left(l^k \right)} < \epsilon$, triggering the $\epsilon$ stopping rule at stage $l^k$. Since forward selection does not stop at stage $l^k-1$, we still have $\omega^{\left(l^k - 1 \right)} \geqslant \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}$
+  \item Assume $\omega^{\left(\bigcdot\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ is not violated until stage $l^k$. This implies that we have $\omega^{\left(l^k - 1 \right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$. Besides, since $\omega^{\left(\bigcdot\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ for the first $l^k-1$ stages, there exists some $\epsilon^*$ such that 
+  %
+  \begin{equation}
+    %
+    \epsilon^* \in \left( \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)} \; , \; \min_{i < l^k} \; \omega^{\left( i \right)} \right) \label{eqn:omega_epsilon}
+    %
+  \end{equation}
+  %
+  If we equip the $\epsilon$ stopping rule with the $\epsilon^*$, the $\epsilon$ stopping rule will also stop forward selection at stage $l^k$.
   %
 \end{itemize}
 \medskip
 
 \noindent
-Hence, ``the $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(2p / \eta \right)}$ stopping rule stops forward selection at stage $l^k$'' is equivalent to ``the last variable that forward selection selects before stop has $\omega > \frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(2p/\eta\right)}$''. As such, we can reparametrize the stopping rule on $\left(Y^{k},X^{k}\right)$ based on $\widehat{q}_{i}^{k}$ as follows
+Hence, `the $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ stopping rule stops forward selection at stage $l^k$' is equivalent to `the last variable that forward selection selects before stop has its $\omega$ larger than $\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}$'. As such, we can re-parameterize the stopping rule on $\left(Y^{k},X^{k}\right)$ based on $\widehat{q}_{i}^{k}$ as follows
 %
 \begin{definition}
-  (the assumptions on $\epsilon$ and $\widetilde{q}^k$ stopping rules) \label{def:stopping assumption}
-\end{definition}    
+  (The $\epsilon$ and $\widetilde{q}^k$ stopping assumptions) \label{def:stopping assumption}
+\end{definition}
 
 \begin{itemize}
   %
-  \item We refer to the \citet{zhang09} assumption on $\epsilon$ stopping rule as \emph{the $\epsilon$ stopping assumption}
+  \item We refer to the \citet{zhang09} assumption on $\epsilon$ stopping rule as \emph{the $\epsilon$ stopping assumption}:
   %
   \begin{eqnarray}
     %
@@ -1169,28 +1143,38 @@ Hence, ``the $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \l
     %
   \end{eqnarray}
   %
-  \item we refer to the following equivalent assumption as \emph{the $\widetilde{q}^k$ stopping assumption} for solar:
+  \item Assume forward selection only selects $\left\{ \mathbf{x}_j:\widehat{q}_j^k > \frac{\widetilde{p} + 1 - l^k} {\widetilde{p}} \right\}$ on subsample $\left(Y^k, X^k \right)$. We define 
   %
-  \begin{eqnarray}
+  \begin{displaymath}
     %
-    \mbox{when forward selection only select } \left\{ \mathbf{x}_j:\widehat{q}_j^k > \frac{\widetilde{p} + 1 - l^k} {\widetilde{p}} \right\} \mbox{ on subsample } \left(Y^k, X^k \right), \notag \\ 
+    \omega^{\left(l^k\right)} = \left\vert \left( \mathbf{x}^{\left( l^k \right)}\right) ^T u^{\left(l^k \right)} \right\vert.
     %
-    \exists \eta \in \left( 0, 1\right) \mbox{ such that } \omega^{\left(l^k \right)} = \left\vert \left( \mathbf{x}^{\left( l^k \right)}\right) ^T u^{\left(l^{k}\right)} \right\vert >\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}. \label{eqn:qk_stopping}
+  \end{displaymath}
+  %
+  For simplicity, we denote $\omega$ as $\omega^{\left( \bigcdot \right)}$ of the last variable that forward selection selects.
+  %
+  \item we refer to the following equivalent assumption for solar as \emph{the $\widetilde{q}^k$ stopping assumption}:
+  %
+  \begin{align}
     %
-  \end{eqnarray}
+    \mbox{when forward selection only selects } \left\{ \mathbf{x}_j:\widehat{q}_j^k > \frac{\widetilde{p} + 1 - l^k} {\widetilde{p}} \right\} \mbox{ on } \left(Y^k, X^k \right), \notag \\
+    %
+    \exists\, \eta \in \left( 0, 1\right) \mbox{ such that } \omega >\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}. \label{eqn:qk_stopping}
+    %
+  \end{align}
   %
 \end{itemize}
 \medskip
 
-Based on Definition~\ref{def:stopping assumption}, we can reparametrize Lemma 1 into Lemma 2.
+Based on Definition~\ref{def:stopping assumption}, we can re-parameterize Theorem~\ref{theoremA1} into Lemma~\ref{lemma:1}.
 
 \begin{lemma}
   %
-  Consider the forward selection algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with Assumption 1 satisfied. With probability larger than $1-\eta$, if eqn~(\ref{eqn:qk_stopping}) is satisfied and
+  Consider the forward selection algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with Assumption 1 satisfied. With probability larger than $1-\eta$, if (\ref{eqn:qk_stopping}) is satisfied and
   \begin{displaymath}
       \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
   \end{displaymath}
-  then 
+  then
   \begin{displaymath}
       \overline{F}=\left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>\widetilde{q}^{k}\right\}.
   \end{displaymath}
@@ -1203,7 +1187,11 @@ Based on Definition~\ref{def:stopping assumption}, we can reparametrize Lemma 1 
 
 \begin{proof}
     %
-    Lemma~\ref{lemma:1} is a straightforward result when replacing the $\epsilon$ stopping rule with $\widehat{q}^k$ stopping rule. Note that we replace $n$ in eqn~(\ref{thm0}) with $n\left(K-1\right)/K$ since each subsample randomly drops $1/K$ of original sample points at Algorithm 1.
+  Lemma~\ref{lemma:1} is derived by replacing the $\epsilon$ stopping assumption with the $\widehat{q}^k$ stopping assumption. Note that
+  \begin{displaymath}
+    \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}} \implies \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right| \geqslant \frac{3\epsilon}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+\end{displaymath}
+since (\ref{eqn:omega_epsilon}) implies that $\exists \epsilon > \frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}$ such that $\omega > \epsilon$.  We also replace $n$ in (\ref{thm0}) with $n\left(K-1\right)/K$ since each subsample randomly drops $1/K$ of the original sample points in Algorithm 1.
     %
 \end{proof}
 \medskip
@@ -1212,14 +1200,14 @@ Based on Definition~\ref{def:stopping assumption}, we can reparametrize Lemma 1 
 
 \subsection*{Step 2 : averaging performance}
 
-Since we assume the nonzero $\overline{\beta}_i$ are the first $p_1$ components of $\overline{\beta}$, Lemma~\ref{lemma:1} can be rewritten as 
+Since we assume the nonzero $\overline{\beta}_i$ are the first $p_1$ components of $\overline{\beta}$, x can be rewritten as
 %
 \begin{lemma}
-  Consider the forward selection algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with Assumption 1 satisfied. With probability less than $\eta$, if eqn~(\ref{eqn:qk_stopping}) is satisfied and
+  Consider the forward selection algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with Assumption 1 satisfied. With probability less than $\eta$, if (\ref{eqn:qk_stopping}) is satisfied and
   \[
       \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
   \]
-  then 
+  then
   \[
   \begin{cases}
       \widehat{q}_j^k \leqslant \widetilde{q}^k, \; \forall j\leqslant p_1\\
@@ -1231,16 +1219,20 @@ Since we assume the nonzero $\overline{\beta}_i$ are the first $p_1$ components 
   \label{lemma:2}
   %
 \end{lemma}
-To accomodate the multiple subsamples in average $L_0$ path, we modify the $\widehat{q}$ stopping rule as follows
+%
+\noindent
+Lemma~\ref{lemma:2} \hl{direcly implies that, with large probability, you can find a theshold value $\widetilde{q}^k$ on the $L_0$ path that perfectly seperates the informative from the redundant.}
+
+To accommodate multiple subsamples in the average $L_0$ path, we define the $\widehat{q}$ stopping rule by slightly modifying (\ref{eqn:qk_stopping}).
 %
 \begin{definition}
-  (the assumption for the $\widetilde{q}$ stopping rule) : we refer to the following rule as \emph{the $\widetilde{q}$ stopping assumption} for average $L_0$ path:
+  (The assumption for the $\widetilde{q}$ stopping rule). We refer to the following rule as \emph{the $\widetilde{q}$ stopping assumption} for the average $L_0$ path:
   %
   \begin{eqnarray}
     %
-    \mbox{when forward selection only select } \left\{ \mathbf{x}_j:\widehat{q}_j^k > \left( \widetilde{p} + 1 - l^k \right) / \widetilde{p} \right\} \mbox{ on subsample } \left(Y^k, X^k \right), \notag \\ 
+    \mbox{when forward selection only selects } \left\{ \mathbf{x}_j:\widehat{q}_j^k > \left( \widetilde{p} + 1 - l^k \right) / \widetilde{p} \right\} \mbox{ on } \left(Y^k, X^k \right), \notag \\
     %
-    \exists \eta \in \left( 0, 1/K\right) \mbox{ such that } \omega = \left\vert \left( \mathbf{x}^{\left( l^k -1 \right)}\right) ^T u^{\left(l^{k}-1\right)} \right\vert >\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left( \frac{4p}{K\eta}\right)}.
+    \exists\, \eta \in \left( 0, 1/K\right) \mbox{ such that } \omega >\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left( \frac{4p}{K\eta}\right)}.
     %
     \label{eqn:q_hat_stopping}
     %
@@ -1249,14 +1241,14 @@ To accomodate the multiple subsamples in average $L_0$ path, we modify the $\wid
 \end{definition}
 \medskip
 
-Based on the $\widetilde{q}$ stopping rule, we can bound the probability and generate the Lemma~\ref{lemma:3}.
+Lemma~\ref{lemma:3} follows from the $\widetilde{q}$ stopping assumption.
 
 \begin{lemma}
-  Consider the forward selection algorithm on the average $L_{0}$ path with Assumption 1 satisfied. With probability less than $\eta$, if eqn~(\ref{eqn:q_hat_stopping}) is satisfied and 
+  Consider the forward selection algorithm on the average $L_{0}$ path with Assumption 1 satisfied. With probability less than $\eta$, if (\ref{eqn:q_hat_stopping}) is satisfied and
   \[
       \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
   \]
-  then 
+  then
   \[
   \begin{cases}
       \frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}>\widetilde{q}^{*},\forall i\leqslant p_{1}\\
@@ -1270,28 +1262,30 @@ Based on the $\widetilde{q}$ stopping rule, we can bound the probability and gen
 \end{lemma}
 
 \begin{proof}
-    The proof is a direct result from Lemma~2. If we apply the $\widetilde{q}$ stopping rule, Lemma~2 implies that 
+    The proof is a direct result from Lemma~2. If we apply the $\widetilde{q}$ stopping rule, Lemma~2 implies that
     \begin{eqnarray}
-        Pr\left\{ \widehat{q}_i^k \leqslant \widetilde{q}^k,\forall i\leqslant p_1 \mbox{ and } \widehat{q}_j^k > \widetilde{q}^k,\forall j>p_1 \right\} \leqslant \eta/K
+        Pr\left\{ \widehat{q}_i^k \leqslant \widetilde{q}^k,\forall i\leqslant p_1 \mbox{ and } \widehat{q}_j^k > \widetilde{q}^k,\forall j>p_1 \right\} \leqslant \eta/K.
     \end{eqnarray}
-    Since, for mutiple event $A_i$, $Pr\left\{ \cap_i A_i\right\} \leqslant \sum_i Pr\left\{ A_i\right\}$, we have 
+    Since, for multiple events $A_i$, $Pr\left\{ \cap_i A_i\right\} \leqslant \sum_i Pr\left\{ A_i\right\}$, we have
     \begin{eqnarray}
         Pr\left\{ \sum_{k=1}^K \widehat{q}_i^k \leqslant \sum_{k=1}^K \widetilde{q}^k,\forall i\leqslant p_1 \mbox{ and } \sum_{k=1}^K  \widehat{q}_j^k > \sum_{k=1}^K \widetilde{q}^k,\forall j>p_1 \right\} \leqslant \eta.
     \end{eqnarray}
-    Since, $\widehat{q}_i = \frac{1}{K}\sum\widehat{q}_{i}^{k}$ and $\widetilde{q}^* = \frac{1}{K}\sum\widetilde{q}^k$, we have 
+    Since, $\widehat{q}_i = \frac{1}{K}\sum\widehat{q}_{i}^{k}$ and $\widetilde{q}^{\,*} = \frac{1}{K}\sum\widetilde{q}^k$, we have
     \begin{eqnarray}
-        Pr\left\{ \widehat{q}_i \leqslant \widetilde{q}^*,\forall i \leqslant p_1 \mbox{ and } \widehat{q}_j > \widetilde{q}^*,\forall j>p_1 \right\} \leqslant \eta.
+        Pr\left\{ \widehat{q}_i \leqslant \widetilde{q}^{\,*},\forall i \leqslant p_1 \mbox{ and } \widehat{q}_j > \widetilde{q}^{\,*},\forall j>p_1 \right\} \leqslant \eta.
     \end{eqnarray}
 \end{proof}
+\noindent
+Lemma~\ref{lemma:3} \hl{direcly implies that, with large probability, you can find a theshold value $\widetilde{q}^*$ on the average $L_0$ path that perfectly seperates the informative from the redundant.}
 
 %%%%%%%%%%%% step 3 %%%%%%%%%%%%
 
 \subsection*{Step 3 : variable selection consistency}
 
-Based on Lemma~\ref{lemma:3}, we can obtain Theorem~\ref{thm:1} for variable selection consistency as a straighforward result.
+Based on Lemma~\ref{lemma:3}, Theorem~\ref{thm:1} on variable selection consistency is straightforward.
 
 \begin{theorem}
-  Consider the forward selection algorithm on the average $L_0$ path with Assumption 1 satisfied, noise $\sigma$ independent of $n$. Assume that the strong irrepresentable condition holds. For each problem of sample size $n$, denote $F\left( n \right)$ as the index set of selected variables when forward selection stops with $\omega\geqslant n^{s/2}$, $\forall s\in(0,1]$ , and $\overline{F}\left(n\right)$ as the correpsonding index set of informative variables. We have 
+  Consider the forward selection algorithm on the average $L_0$ path with Assumption 1 satisfied, noise $\sigma$ independent of $n$. Assume that the strong irrepresentable condition holds. For each sample size $n$, denote $F\left( n \right)$ as the index set of selected variables when forward selection stops with $\omega\geqslant n^{s/2}$, $\forall s\in(0,1]$ , and $\overline{F}\left(n\right)$ as the corresponding index set of informative variables. We have
   \[
       Pr\left(\;F\left(n\right)\neq\overline{F}\left(n\right)\;\right)\leqslant \exp\left(-\frac{n^{s}}{\log\left(n\right)}\right)
   \]
@@ -1299,7 +1293,7 @@ Based on Lemma~\ref{lemma:3}, we can obtain Theorem~\ref{thm:1} for variable sel
   \[
       p\left(n\right)\leqslant\exp\left(\frac{n^{s}}{\log\left(n\right)}\right),
   \]
-  and 
+  and
   \[
       \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3n^{(s-1)/2}}{\rho_{X}\left(\overline{F}\left(n\right)\right)}
   \]
@@ -1310,15 +1304,15 @@ Based on Lemma~\ref{lemma:3}, we can obtain Theorem~\ref{thm:1} for variable sel
 \end{theorem}
 
 \begin{proof}
-  When $n$ is sufficiently large, the assumption 
+  When $n$ is sufficiently large, the assumptions
   \[
       \omega^{\left(l^k \right)} = \left\vert \left( \mathbf{x}^{\left( l^k \right)}\right) ^T u^{\left(l^{k}\right)} \right\vert >\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}
-  \] 
+  \]
   and
   \[
       \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}}
   \]
-  hold with $\eta = \exp\left(-n^s/\log(n)\right)$. Thus, Theorem~\ref{thm:1} is a direct result from Lemma~\ref{lemma:2} and \ref{lemma:3}.
+  hold with $\eta = \exp\left(-n^s/\log(n)\right)$. Thus, Theorem~\ref{thm:1} follows from Lemma~\ref{lemma:2} and \ref{lemma:3}.
 \end{proof}
 
 
@@ -1329,3 +1323,38 @@ Based on Lemma~\ref{lemma:3}, we can obtain Theorem~\ref{thm:1} for variable sel
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\citet{tibshirani2015general} \hl{illustrates his point in a number of large-scale applications. We summarize two of them in Figure}~\ref{fig:intro1} and \ref{fig:intro2}.
+%
+\begin{itemize}
+  %
+  \item With $n = 200, p = 4000$, the top row of Figure~\ref{fig:intro1} \hl{shows that forward selection can achieve competitive mean squared errors to that of group lasso under two different setups for the predictors in group lasso regression: uncorrelated and block correlated. (The curves were averaged over 10 simulations, with standard deviations denoted by dotted lines.) The lower table reports runtimes in seconds (averaged over 10 simulations, with standard deviations in parentheses) for the various algorithms considered, and shows that the stagewise algorithm represents a computationally attractive alternative to the coordinate descent approach and the Frank-Wolfe algorithm.}
+  %
+  \item Figure~\ref{fig:intro2} \hl{compares between fused lasso and forward selection on image denoising. The true underlying $300 \times 200$ image is displayed in the middle of the top row. Over 10 noisy pertubations of this underlying image, with one such example shown in the right plot of the top row, we compare averaged mean squared errors of the exact solutions and stagewise estimates, in the left plot of the top row. Average timings for these methods are given in the bottom table. (Standard deviations are denoted by dotted lines in the error plots, and are in parentheses in the table.) The stagewise estimates have competitive mean squared errors and are fast to compute.}
+  %
+\end{itemize}
+
+\begin{figure}[ht]
+  %
+    \centering
+  %
+    \includegraphics[width=0.66\paperwidth]{intro1.pdf}
+  %
+    \caption{Statistical and computational comparisons between group lasso (coordinate descent) and the forward selection with $n = 200, p = 4000$.}
+  %
+    \label{fig:intro1}
+  %
+\end{figure}
+
+\begin{figure}[ht]
+  %
+    \centering
+  %
+    \includegraphics[width=0.55\paperwidth]{intro2.pdf}
+  %
+    \caption{Statistical and computational comparisons between fused lasso and forward selection on image denoising.}
+  %
+    \label{fig:intro2}
+  %
+\end{figure}
+
