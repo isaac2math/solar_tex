@@ -7,8 +7,8 @@
 
 \begin{document}
 
-\title{Solar: fast and accurate variable selection in high dimensional and large scale data\tnoteref{tstar}}
-\tnotetext[tstar]{The authors would like to thank Pierre Del Moral and Peter Exterkate for careful comments as well as seminar participants at Google Research, NICTA, Monash University, University of Melbourne, and UNSW.}
+\title{Solar: $L_0$ solution path averaging for fast and accurate variable selection\\ in high-dimensional data\tnoteref{tstar}}
+\tnotetext[tstar]{The authors would like to thank Pierre Del Moral (UNSW and INRIA) and Peter Exterkate for careful comments as well as seminar participants at Google, NICTA, Monash University, University of Melbourne, and UNSW.}
 
 \author{Ning Xu\corref{cor1}}
 \ead{n.xu@sydney.edu.au}
@@ -18,16 +18,12 @@
 \ead{tim.fisher@sydney.edu.au}
 \address{School of Economics, University of Sydney, Australia}
 
-\author{Jian Hong}
-\ead{jian.hong@sydney.edu.au}
-\address{School of Economics, University of Sydney, Australia}
-
 \cortext[cor1]{Principal corresponding author.}
 
 \begin{abstract}
-  %
-  We propose a new algorithm for variable selection in high dimensional and large scale data, \emph{subsample-ordered least-angle regression (solar)}, and a coordinate descent generalization, \emph{solar-cd}. We show solar variable selection consistency and variable ranking accuracy on the average $L_0$ path under the general framework of forward selection. Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, without any increase in computation load, substantial improvements over lasso in terms of the sparsity (37-64\% reduction in redundant variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the efficiency and accuracy of post-selection inference; and (iv) replacing lasso with solar in subsampling selection (e.g., the bootstrap lasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity, ranking accuracy, and computation load (a saving of at least 96\% in runtime, exceeding the theoretical maximum speedup for parallelizing lasso-type algorithms). Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easy to adapt to lasso variants. In a supplementary file and at the dedicated \href{https://github.com/isaac2math/solarpy}{Github page}, we provide a parallel computing package for solar (solarpy) that uses a Python interface and an Intel MKL Fortran/C++ compiler.
-  %
+%
+We propose a new algorithm for variable selection in high dimensional and large scale data, \emph{subsample-ordered least-angle regression (solar)}, and its coordinate descent generalization, \emph{solar-cd}. Solar re-constructs lasso paths using the $L_0$ norm and averages the resulting solution paths across subsamples. Path averaging retains the ranking information of the informative variables while averaging out sensitivity to high dimensionality, improving variable selection stability, efficiency, and accuracy. Using the same numerical optimzers as lasso does, solar can be generalized to different lasso variants. We prove that: (i) with a high probability, path averaging perfectly separates informative variables from redundant variables on the average $L_0$ path; (ii) solar variable selection is consistent and accurate; and (iii) the probability that solar omits weak signals is controllable for finite sample size. Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, with less than $1/3$ of the lasso computation load, substantial improvements over lasso in terms of the sparsity (64-84\% reduction in redundant variable selection) and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity and stability of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the accuracy of post-selection inference on weak signals with limited $n$; (iv) replacing lasso with solar in bootstrap selection (e.g., bolasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity and ranking accuracy with the computation load of only one lasso realization; and (v) given the computation resources, solar bootstrap selection is substantially faster (98\% lower computation time) than the theoretical maximum speedup for parallelized bootstrap lasso (confirmed by Amdahl's law). The efficiency of bootstrap solar makes cross validation computationally affordable for optimizing the bootstrap selection threshold even in large scale and high dimensional data.
+%
 \end{abstract}
 
 \begin{keyword}
@@ -48,23 +44,25 @@ Variable selection, sparsity, computation time, complicated dependence structure
 
 Recent innovations to lasso-type algorithms \citep{efronall04, friedman2007pathwise, friedman2010regularization} have largely addressed selection of redundant variables, rejection of informative variables, and poor performance under high multicollinearity in high dimensional ($p>n$) and large scale data (large $p$ and large $n$). However, in alleviating old problems, the innovations have revealed new challenges.
 
-Bootstrap variable selection, for example, markedly improves variable selection sparsity \citep{bach2008bolasso, meinshausen2010stability}, yet it relies on repeating cross-validated lasso on tens to hundreds of bootstrap subsamples for variable selection. \citet{xu2012asymptotic} and Sections~\ref{subsection:suml1} and \ref{subsection:comp} below illustrate that bootstrap selection methods exponentially increase computation load, limiting applicability in large scale data such as DNA sequencing, image recognition, and natural language processing (where both $p$ and $n$ are often over $10,000$).
+Bootstrap variable selection [e.g., \citet{bach2008bolasso}, \citet{meinshausen2010stability}, \citet{wang2011random}, and \citet{mameli2017estimating}] markedly improves variable selection sparsity and inference accuracy, yet it requires repeating lasso and its variants (often with cross-validation) on hundreds of bootstrap subsamples to average the variable selection results or the inference results. \citet{xu2012asymptotic} and Sections~\ref{subsection:suml1} and \ref{subsection:comp} below illustrate that bootstrap selection methods exponentially increase computation load, limiting applicability in large scale data such as DNA sequencing, image recognition, fMRI and MRI data of the neuroimaging, and natural language processing (where both $p$ and $n$ are often over $10,000$). More seriously, choosing the bootstrap variable selection threshold, which is often set based on field experience or simulations, remains an unsolved issue. \citet{bach2008bolasso} and \citet[Figure~2]{huang2014stat} illustrate that a pre-defined threshold may omit informative variables (low power) and select redundant variables (high false discovery rate) in both high and low dimensions.
 
 One strategy to improve lasso selection sparsity without increasing computation burden is to use a post-selection rule to screen variables selected by lasso. Post-lasso selection rules [e.g., the `safe rule' \citep{ghaoui2010safe} and the `strong rule' \citep{tibshirani2012strong}] are capable of reducing the number of variables to enhance computational efficiency in lasso. However, recent research \citep{wang2014safe, zeng2017efficient} and Section~\ref{section:example} suggest both rules may be prone to rejecting informative variables, selecting redundant variables, or proposing repeated modifications (e.g., rejecting a variable in an early round and adding it back in a later round).
 
-Data-splitting hypothesis tests are another way to screen variables selected by lasso \citep{wasserman2009high, meinshausen2009p,barber2019knockoff,romano2019multiple, diciccio2020exact}. The original data are divided into two: one part for variable selection, the other part for testing. However, to improve test power, data splitting is repeated on each bootstrap subsample, raising similar computational concerns as bootstrapping variable selection \citep{bach2008bolasso,meinshausen2010stability}. \citet{diciccio2020exact} also argue that because data splitting reserves some of the data for variable selection, it reduces the degrees of freedom for testing on the remaining data, presenting a challenge when sample size is limited.
+Data-splitting hypothesis tests are another way to screen variables selected by lasso \citep{wasserman2009high, meinshausen2009p,romano2019multiple, diciccio2020exact}. The original data are divided into two: one part for variable selection, the other part for testing. However, to improve test power, data splitting is repeated on each bootstrap subsample, raising similar computational concerns as bootstrapping variable selection \citep{bach2008bolasso}. \citet{diciccio2020exact} also argue that because data splitting reserves some of the data for variable selection, it reduces the degrees of freedom for testing on the remaining data, presenting a challenge to detect weak signals when sample size is limited.
 
 Specifically designed to address the challenges of high dimensional data, the variable screening algorithm \citep{fan2008sure, hall2009using,hall2009usingb, li2012robust, li2012feature} ranks the absolute values of unconditional correlations between each covariate and the response variable, selecting only the top-ranked variables. However, \citet{fan2008sure}, \citet{barut2016conditional}, and Section~\ref{section:example} below show that variable screening also suffers from selection of redundant variables and rejection of informative variables when the dependence structures are complicated.
 
-According to \citet{friedman2001elements, weisberg04}, forward selection \citep{efroymson1966stepwise, draper1966applied} was historically dismissed in high-dimensional spaces due to inefficiency and sensitivity to sampling randomness, multicollinearity, noise, and outliers due to the iterative refitting of the residual. \citet{tibshirani2015general} illustrates through simulation that, \hl{compared with lasso-type estimators, forward selection may produce a competitive generalization error} of fitted models in some applications. \citet{tibshirani2015general} \hl{also illustrates that forward selection is computationally competitive to lasso in some applications (image denoising, matrix completion, etc)}. However, \citet{tibshirani2015general} does not suggest a solution of the sensitivity to sampling randomness, multicollinearity, noise, and outliers.
+According to \citet{friedman2001elements, weisberg04}, forward selection was historically dismissed in high-dimensional spaces due to inefficiency and sensitivity to sampling randomness, multicollinearity, noise, and outliers due to the iterative refitting of the residual. \citet{tibshirani2015general} illustrates through simulation that (i) forward selection may produce similar generalization errors to lasso-type estimators for fitted models and (ii) that forward selection is computationally competitive to lasso in different applications (image de-noising, matrix completion, etc.). However, \citet{tibshirani2015general} does not suggest any solution to a range of issues for forward selection or lasso (solved by lars), including instability of variable selection, selection of redundant variables, lack of robustness to the irrepresentable condition and complicated dependence structures, or sensitivity to sampling randomness, multicollinearity, noise, and outliers. Moreover, \citet{tibshirani2015general} demonstrates the computation speedup through comparison without providing any rigorous analysis.
 
 \subsection{Main results}
 
-To address these issues, we propose a new forward selection algorithm, \emph{subsample-ordered least-angle regression (solar)}, and its coordinate-descent generalization, \emph{solar-cd}. Because solar is based on averaging and re-ordering lasso paths via the $L_0$ norm, it is easily adaptable to many lasso variants. We prove $L_0$ path ranking accuracy and variable selection consistency under the \citet{zhang09} general framework of forward selection.
+To address issues above, we propose a new forward selection algorithm, \emph{subsample-ordered least-angle regression (solar)}, and its coordinate-descent generalization, \emph{solar-cd}.
 
-Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, without any increase in computation load, substantial improvements over lasso in terms of the sparsity (37-64\% reduction in redundant variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the efficiency and accuracy of post-selection inference; (iv) replacing lasso with solar in subsampling selection (e.g., the bootstrap lasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity, ranking accuracy, and computation load (a saving of at least 96\% in runtime, exceeding the theoretical maximum speedup for parallelizing lasso-type algorithms). We provide a parallel computing package for solar (\texttt{solarpy}) that uses a Python interface and an Intel MKL Fortran/C++ compiler in a supplementary file and dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
+Solar re-constructs lasso paths using the $L_0$ norm and averages the resulting solution paths across subsamples. Path averaging retains the ranking information of the informative variables while averaging out sensitivity to high dimensionality, improving variable selection stability, efficiency, and accuracy. Using the same numerical optimizers as lasso does, solar can be easily generalized to many lasso variants. Under the \citet{zhang09} general framework of forward selection, we prove that: (i) with a high probability, path averaging perfectly separates informative variables from redundant variables on the average $L_0$ path; (ii) solar variable selection is consistent and accurate under the general framework of forward selection; and (iii) the probability that solar omits weak signals is controllable for finite sample size.
 
-The paper is organized as follows. In Section~\ref{section:algo}, we introduce the solar algorithm, explain the coordinate descent generalization of solar, and discuss generalizations of solar to variants of lasso. In Section~\ref{section:adv}, we use examples to demonstrate the advantages of solar over lasso, the safe/strong rules, variable screening, forward regression, and lasso-related bootstrap selection. In Section~\ref{section:comp}, we use simulations to demonstrate the advantages of solar over lasso-type algorithms in terms of variable selection sparsity, accuracy, and computation load. In Section~\ref{section:application}, we use real-world data to show that the improvements from solar are feasible in the presence complicated dependence structures, while lasso and elastic net [the lasso variant alleged \citep{zou2005regularization, jia2010model} to have the best selection accuracy and sparsity under multicollinearity] completely lose sparsity. The proofs of $L_0$ path ranking accuracy and variable selection consistency are in Appendix A. The solarpy code and raw simulation results are in the Supplementary Material.
+Using simulations, examples, and real-world data, we demonstrate the following advantages of solar: (i) solar yields, with less than $1/3$ of the lasso computation load, substantial improvements over lasso in terms of the sparsity (64-84\% reduction in redundant variable selection), stability, and accuracy of variable selection; (ii) compared with the lasso safe/strong rule and variable screening, solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition; (iii) the sparsity of solar conserves residual degrees of freedom for data-splitting hypothesis testing, improving the efficiency and accuracy of post-selection inference for weak signals with limited $n$; (iv) replacing lasso with solar in subsampling selection (e.g., the bootstrap lasso or stability selection) produces a multi-layer variable ranking scheme that improves selection sparsity and ranking accuracy with the computation load of only one lasso realization; and (v) Given the computation resources, solar bootstrap is substantially faster (98\% lower computation time) than the theoretical maximum speedup for parallelized bootstrap lasso (confirmed by Amdahl's law). The efficiency of bootstrap solar makes cross validation computationally affordable for optimizing the bootstrap selection threshold even in large scale and high dimensional data. We provide a parallel computing package for solar (\texttt{solarpy}) that uses a Python interface and an Intel MKL Fortran/C++ compiler in a supplementary file and dedicated \href{https://github.com/isaac2math/solarpy}{Github page}.
+
+The paper is organized as follows. In Section~\ref{section:algo}, we introduce the solar algorithm, show the theoretical properties of path avergaing and solar, explain the coordinate descent generalization of solar, and discuss generalizations of solar to variants of lasso. In Section~\ref{section:adv}, we use examples to demonstrate the advantages of solar over lasso, the safe/strong rules, and variable screening . In Section~\ref{section:comp}, we use simulations to demonstrate the advantages of solar over lasso-type algorithms in terms of variable selection sparsity, accuracy, and computation load. In Section~\ref{section:application}, we use real-world data to show that the improvements from solar are feasible in the presence complicated dependence structures, while lasso and elastic net [the lasso variant alleged \citep{zou2005regularization, jia2010model} to have the best selection accuracy and sparsity under multicollinearity] completely lose sparsity. The proofs of the properties of solar are in Supplementary Material~A. The \texttt{solarpy} code and raw simulation results are in Supplementary Material~B.
 
 %%%%%%%%%%%%%%%%%%%%%%%
 %%%%%% SECTION 2 %%%%%%
@@ -72,13 +70,11 @@ The paper is organized as follows. In Section~\ref{section:algo}, we introduce t
 
 \section{The Solar algorithm \label{section:algo}}
 
-Intuitively, the advantages of solar over lasso and lasso-related bootstrap selection stem from a reallocation of computation. Lasso and its variants allocate most of the computation to optimizing the shrinkage parameter ($\lambda$) using cross-validation. By contrast, without any increase in computation load, solar allocates computation to stabilizing the solution path.
-
-\citet[Theorem~2]{zhang09} reveals that the earlier a variable enters the solution path, the more likely it is to be informative. This suggests an accurate and stable ordering of variables in the solution path may help to identify the informative variables. Since we focus on accuracy, the only relevant feature of the regression coefficients in the solution path is whether $\beta_i = 0$ at each stage. Thus, we re-parameterize the lasso path using the $L_0$ norm.
+The key to solar lies in the parameterization of the solution path. For any forward selection method, \citet[Theorem~2]{zhang09} shows that the earlier a variable enters the solution path, the more likely it is to be informative. Thus, an accurate and stable ordering of variables in the solution path may help to identify the informative variables. Since we focus on accuracy, the only relevant feature of the regression coefficients in the solution path is whether $\beta_i = 0$ at each stage. Thus, solar parameterizes the lasso path (or, more generally, any forward selection path) using the $L_0$ norm.
 %
 \begin{definition}[$L_0$ solution path]
   %
-  Define the \textbf{$L_0$ solution path} on $\left( Y, X \right)$ to be the order that least angle regression includes variables across all stages. For example, if the least angle regression includes $\mathbf{x}_3$ at stage 1, $\mathbf{x}_2$ at stage 2 and $\mathbf{x}_1$ at stage 3, the corresponding $L_0$ path is the ordered set $\left\{ \left\{\mathbf{x}_3 \right\}, \left\{ \mathbf{x}_3, \mathbf{x}_2 \right\}, \left\{ \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1 \right\} \right\}$.
+  Define the \textbf{$L_0$ solution path} on $\left( Y, X \right)$ to be the order that least angle regression includes variables across all stages. For example, if the least angle regression includes $\mathbf{x}_3$ at stage 1, $\mathbf{x}_2$ at stage 2 and $\mathbf{x}_1$ at stage 3, the corresponding $L_0$ path is the ordered set $\left\{ \mathbf{x}_3, \mathbf{x}_2, \mathbf{x}_1 \right\}$.
   %
   \label{def:solution_path}
   %
@@ -86,7 +82,21 @@ Intuitively, the advantages of solar over lasso and lasso-related bootstrap sele
 
 \subsection{Solar optimized by least angle regression}
 
-A solution path is the foundation of $L_p$-penalized regression. The first step of solar is to reduce the sensitivity of the solution path when $p > n$. The \emph{average $L_0$ solution path estimation} algorithm (summarized in Algorithm~\ref{algo:APE-lar} and illustrated in Figure~\ref{fig:q_demo}) accomplishes this step by estimating the \emph{average stage each $\mathbf{x}_i$ enters the solution path} of a least angle regression.
+The solar algorithm involves two steps: \emph{parameterizing and averaging $L_0$ paths} and \emph{selecting variables on the average $L_0$ path}.
+
+\subsubsection{$L_0$ path parameterizing and averaging}
+
+The solution path is the foundation of variable (feature) selection in $L_p$-regularized linear modelling. The first step in solar is to improve the robustness of the solution path to high dimensional issues such as multicollinearity, complicated dependence structures, noise, weak signals, etc. In particular, there are two major concerns.
+\begin{itemize}
+  %
+  \item Computation efficiency: computation load is a central concern in subsampling-based model averaging. Because bootstrap methods (e.g., bootstrap lasso) require hundreds of lasso repetitions to average out variable selection issues in high dimensions, they are computationally expensive with large $n$ and large $p$. Thus, improving selection performance and reducing the number of repetitions would go a long way to reducing computation load.
+  %
+  \item Averaging efficiency: the $L_1$ lasso solution path (solved by lars) is essentially a piecewise linear function $\beta = g(\lambda)$, which is easy to average. By contrast, it is not obvious how to average the $L_0$ path because it is an ordered set of rankings. If we average the ranks each $\mathbf{x}_i$ enters the path in large $p$ problems, a weak signal (i.e., an $\mathbf{x}_i$ with a small but non-zero $\left\Vert \beta_i \right\Vert_1$ in the population) may occasionally be ranked at a later stage, returning a large stage value, and exerting outlier influence on the stage value averaging. In other words, to accurately average solution paths using as few subsamples as possible, we need a parameterization method for the $L_0$ path that is more robust to outliers in ranking $\mathbf{x}_i$.
+  %
+\end{itemize}
+
+\noindent
+Our solution to these concerns is the $\widehat{q}$ \emph{method}, summarized in Algorithm~\ref{algo:APE-lar} and illustrated in Figure~\ref{fig:q_demo}. For solution path averaging, instead of using the stage value each $\mathbf{x}_i$ enters the solution path, which varies in the range $\left[0, +\infty \right)$, Algorithm~\ref{algo:APE-lar} uses $\widehat{q}^{\,k}_i$, which normalizes the stage value into the range $\left[ 0,1 \right]$. The concentration inequalities for empirical processes show that averaging $\widehat{q}^{\,k}_i$ across subsamples converges much faster and is much more stable than averaging the stage values of the $\mathbf{x}_i$.
 
 \smallskip
 \begin{algorithm}[ht]
@@ -98,7 +108,7 @@ A solution path is the foundation of $L_p$-penalized regression. The first step 
   \smallskip
   \Input{$\left( Y, X \right)$.}
 
-  generate $K$ subsamples $\left\{ \left( Y^k, X^k \right) \right\}^{K}_{k=1}$ by randomly remove $1/K$ of observations in $\left( Y, X \right)$\;
+  divide the original sample equally into $K$ folds and generate $K$ subsamples $\left\{ \left( Y^k, X^k \right) \right\}^{K}_{k=1}$ by removing one fold in turn from $\left( Y, X \right)$\;
 
   set $\widetilde{p} = \min\left\{ n\left(K-1\right)/K, p \right\}$\;
 
@@ -118,7 +128,7 @@ A solution path is the foundation of $L_p$-penalized regression. The first step 
 
   \Return $\widehat{q}$
 
-\caption{average $L_0$ solution path estimation \label{algo:APE-lar}}
+\caption{$\widehat{q}$ method: parameterizing and averaging $L_0$ solution paths} \label{algo:APE-lar}
 
 \end{algorithm}
 
@@ -136,7 +146,9 @@ A solution path is the foundation of $L_p$-penalized regression. The first step 
 %
 \end{figure}
 
-After the subsamples are created, lines~\ref{inner_averaging_start}-\ref{inner_averaging_end} of Algorithm~\ref{algo:APE-lar} compute $\widehat{q}^k$, which summarizes the order that least angle regression includes each $\mathbf{x}_i$ across all stages (see Figure~\ref{fig:q_demo}). The unrestricted least angle regression ranks variables by the stage they enter the solution path. As shown in line~\ref{inner_averaging_end} of Algorithm~\ref{algo:APE-lar} and Figure~\ref{fig:q_demo}, variables included at earlier stages have larger $\widehat{q}^k_i$ values: the first variable included is assigned $1$, the last is assigned $1/\widetilde{p}$, while the rejected variables are assigned $0$ (which occurs only when $p > n$). Thus, the$L_0$ solution path is obtained by ranking the $\mathbf{x}_i$ according to their $\widehat{q}^k_i$ values.
+After the subsamples are created, lines~\ref{inner_averaging_start}-\ref{inner_averaging_end} of Algorithm~\ref{algo:APE-lar} compute $\widehat{q}^k$, which summarizes the order that least angle regression includes each $\mathbf{x}_i$ across all stages (see Figure~\ref{fig:q_demo}). The unrestricted least angle regression ranks variables by the stage they enter the solution path. As shown in line~\ref{inner_averaging_end} of Algorithm~\ref{algo:APE-lar} and Figure~\ref{fig:q_demo}, variables included at earlier stages have larger $\widehat{q}^k_i$ values: the first variable included is assigned $1$, the last is assigned $1/\widetilde{p}$, while the rejected variables are assigned $0$ (which occurs only when $p > n$). Thus, the $L_0$ solution path is obtained by ranking the $\mathbf{x}_i$ according to their $\widehat{q}^k_i$ values.
+
+
 
 \citet[Theorem 2]{zhang09} implies that, on average, variables with the largest $\widehat{q}^k_i$ values are more likely to be informative. The $\widehat{q}^k_i$ may be sensitive in high-dimensional spaces to multicollinearity, sampling randomness, and noise. In these circumstances, a redundant variable may be included at an early stage in some $\left( Y^k, X^k \right)$ subsample. Algorithm~\ref{algo:APE-lar} reduces the impact of sensitivity in the $\widehat{q}^k_i$ by computing $\widehat{q} := \frac{1}{K} \sum_{k=1}^{K} \widehat{q}^k$ and ranking the $\mathbf{x}_i$ according to $\widehat{q}_i$ (the $i$\textsuperscript{th} entry in $\widehat{q}$), to arrive at the average $L_0$ solution path. The average $L_0$ solution path is formally defined as follows.
 
@@ -144,7 +156,7 @@ After the subsamples are created, lines~\ref{inner_averaging_start}-\ref{inner_a
 
 \begin{definition}[average $L_0$ solution path]
   %
-  Define the \textbf{average $L_0$ solution path} of least angle regression on $\left\{ \left( Y^k, X^k \right) \right\}_{k=1}^{K}$ to be the (decreasing) rank order of the $\mathbf{x}_i$ variables based on their corresponding $\widehat{q}_i$ values. For example, in Figure~\ref{fig:q_demo}, the $\widehat{q}_i$ for $\mathbf{x}_1$, $\mathbf{x}_2$ and $\mathbf{x}_3$ are, respectively, $\widehat{q}_1 = 5/6$, $\widehat{q}_2 = 4/6$ and $\widehat{q}_3 = 3/6$. Thus, the average $L_0$ solution path may be represented as an ordered set $\left\{ \left\{ \mathbf{x}_1 \right\}, \left\{ \mathbf{x}_1, \mathbf{x}_2 \right\}, \left\{ \mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3 \right\} \right\}$.
+  Define the \textbf{average $L_0$ solution path} of least angle regression on $\left\{ \left( Y^k, X^k \right) \right\}_{k=1}^{K}$ to be the (decreasing) rank order of the $\mathbf{x}_i$ variables based on their corresponding $\widehat{q}_i$ values. For example, in Figure~\ref{fig:q_demo}, the $\widehat{q}_i$ for $\mathbf{x}_1$, $\mathbf{x}_2$ and $\mathbf{x}_3$ are, respectively, $\widehat{q}_1 = 5/6$, $\widehat{q}_2 = 4/6$ and $\widehat{q}_3 = 3/6$. Thus, the average $L_0$ solution path may be represented as an ordered set $\left\{ \mathbf{x}_1, \mathbf{x}_2, \mathbf{x}_3 \right\}$.
   %
   \label{def:L_0_solution_path}
   %
@@ -152,7 +164,20 @@ After the subsamples are created, lines~\ref{inner_averaging_start}-\ref{inner_a
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-The solar algorithm, summarized in Algorithm~\ref{algo:solar}, is presented under the generic framework of forward regression and can easily be adapted to least angle regression, forward or backward selection algorithms. Using the \citet{zhang09} framework, we prove solar variable selection consistency and variable ranking accuracy on the average $L_0$ path (see Appendix~A).
+To justify theoretically the $\widehat{q}$ method, we use the \citet{zhang09} framework to derive the theoretical properties of path averaging (see Appendix~A).
+
+\begin{itemize}
+  \item Under the \citet{zhang09} conditions, Lemma~\ref{lemma:1} shows that, with a high probability, using $\widehat{q}^{\,k}_i$ ranking for variable selection on $\left( Y^k, X^k \right)$ generates the same theoretical results as the \citet{zhang09} forward selection method.
+  %
+  \item Under a similar stopping condition to \citet{zhang09}, Lemma~\ref{lemma:2} shows that, with a high probability, there exists a threshold $c^k$ for the $L_0$ path on $\left( Y^k, X^k \right)$ such that $\widehat{q}^{\,k}_i \geqslant c^k$ for informative $\mathbf{x}_i$ and $\widehat{q}^k_i < c^k$ for redundant $\mathbf{x}_i$
+  %
+  \item Using Lemma~\ref{lemma:2}, Lemma~\ref{lemma:3} shows that there exists a threshold $c = \sum_{i=k}^{K} c^k/K$ for the average $L_0$ path such that $\widehat{q}_i \geqslant c$ for informative $\mathbf{x}_i$ and $\widehat{q}_i < c$ for redundant $\mathbf{x}_i$ with large probability.
+  %
+\end{itemize}
+
+\subsubsection{Variable selection on the average $L_0$ path}
+
+The solar algorithm is constructed on the aveage $L_0$ path and summarized in Algorithm~\ref{algo:solar}. We present solar under the generic framework of forward regression and can easily adapt it to least angle regression, forward or backward selection algorithms.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -178,9 +203,29 @@ The solar algorithm, summarized in Algorithm~\ref{algo:solar}, is presented unde
 
 In Algorithm~\ref{algo:solar}, variables are included into forward regression according to their rank order in the average $L_0$ solution path, represented by $\left\{ Q(c) \vert c = 1, 0.98, \ldots, 0\right\}$ in Algorithm~\ref{algo:solar}. We use $\widehat{q}$ from Algorithm~\ref{algo:APE-lar} to generate a list of variables $Q \left( c \right) = \left\{ \mathbf{x}_j \; \vert \; \widehat{q}_j \geqslant c, \forall j \leqslant p \right\}$. For any $c_1 > c_2$, $Q\left(c_1\right) \subset Q\left(c_2\right)$, implying a sequence of nested sets $\left\{ Q(c) \vert c = 1, 0.98, \ldots, 0\right\}$. Each $c$ denotes a stage of forward regression. For a given value of $c$, $Q(c)$ denotes the set of variables with $\left\Vert \beta_i \right\Vert_0=1$ on average and $Q(c) - Q(c - 0.02)$ is the set of variables with $\left\Vert \beta_i \right\Vert_0$ just turning to $1$ at $c$. Therefore, $\left\{ Q(c) \vert c = 1, 0.98, \ldots, 0\right\}$ is the average $L_0$ solution path of Definition~\ref{def:L_0_solution_path}. Variables that are more likely to be informative have larger $c$ values in $Q(c)$ and will be selected first by the solar algorithm.
 
+Using the \citet{zhang09} framework and Lemmas~\ref{lemma:2} and~\ref{lemma:3}, we derive the following theoretical results for variable selection (see Appendix~A).
+
+\begin{itemize}
+  %
+  \item Theorem~\ref{thm:1} shows that solar variable selection is $L_0$ consistent under similar sparse eigenvalue and irrepresentable conditions as have been used to prove  lasso consistency.
+  %
+  \item Under similar assumptions to \citet{zhang09}, Lemmas~\ref{lemma:4} and \ref{lemma:5} show that the number of omitted informative $\mathbf{x}_i$ and the probability of selecting at least one redundant $\mathbf{x}_i$ are restricted by sample size, the sparse eigenvalue condition, and the stopping condition.
+  %
+\end{itemize}
+
+The key difference between solar and the lasso-type estimators, and the source of the advantages of solar, is solution path averaging.
+%
+\begin{itemize}
+  %
+  \item The difference between solar and lasso is that solar averages the solution path. Lasso and solar both use the solution path for variable selection. Lasso and its variants focus on optimizing the shrinkage parameter $\lambda$ (via cross validation), leaving aside concerns about the reliability of the lasso path in high dimensions. Optimizing $\lambda$ on an unreliable path renders variable selection difficult. By contrast, solar  prioritizes averaging the solution path, which not only averages out  path unreliability in high dimensions, but also ranks all the informative variables at the start of the average $L_0$ path (as shown in Lemma~\ref{lemma:2} and~\ref{lemma:3}). Hence, with a high probability, the variable selection algorithm needs only to analyze the variables at the start of the average $L_0$ path, making selection accurate and efficient.
+  %
+  \item The difference between solar and lasso-related bootstrap selection (e.g., bolasso) is in how they average the variable selection algorithm. Given the $\lambda$ value (optimal or not), lasso-related bootstrap selection averages the selection \emph{results} across subsamples. Thus, bootstrap selection requires hundreds of repetitions to average out the instability and redundancy of lasso variable selection \citep{bach2008bolasso}. By contrast, solar averages solution \emph{paths}, which solves most of the lasso instability and redundancy issues, returning a more reliable path (the average $L_0$ path). Variable selection along a reliable path substantially reduces the likelihood that solar selects redundant variables or omits informative variables. As a result, solar-related bootstrap selection (e.g., bootstrap solar or solar stability selection) requires only 3-5 repetitions to outperform hundreds of lasso-related bootstrap repetitions (see Section~\ref{subsection:comp} for details).
+  %
+\end{itemize}
+
 \subsection{Solar optimized by coordinate descent}
 
-The solar algorithm can easily be generalized to use coordinate descent. For lasso, least angle regression or coordinate descent generates a solution path parameterized by the $\beta_i$ and the shrinkage parameter $\lambda$. Thus, to reprogram solar to use coordinate descent, we simply replace Algorithm~\ref{algo:APE-lar} with Algorithm~\ref{algo:APE-cd}, which records the order of variable selection along the coordinate descent solution path.
+The solar algorithm can easily be generalized to use coordinate descent. For lasso, least angle regression or coordinate descent generates the same solution path parameterized by the $\beta_i$ and the shrinkage parameter $\lambda$. Thus, to reprogram solar to use coordinate descent, we simply replace Algorithm~\ref{algo:APE-lar} with Algorithm~\ref{algo:APE-cd}, which records the order of variable selection along the coordinate descent solution path.
 
 \smallskip
 \begin{algorithm}[ht]
@@ -232,10 +277,10 @@ The solar algorithm can easily be generalized to use coordinate descent. For las
 
 Algorithm~\ref{algo:APE-cd} serves the same purpose as Algorithm~\ref{algo:APE-lar}: to estimate the average $L_0$ path. Algorithm~\ref{algo:APE-cd} uses $\lambda$ to record the order that each variable enters the path. Consider the example in Figure~\ref{fig:q_demo_3}. To re-parameterize the solution path, we denote $\lambda_s$ to be the $\lambda$ value that coordinate descent lasso includes $s$ variables, $\forall s\in \left( 0, \min \left\{ n/2, p \right\} \right]$, giving a sequence of $\lambda$ for grid search. In each subsample $\left( Y^k, X^k \right)$, we train a standard pathwise coordinate descent for lasso, allowing $\lambda$ to increase stepwise within the grid $\left\{\lambda_1, \ldots, \lambda_{ \min \left\{ n/2, p \right\} } \right\}$, where $\lambda_1 \geqslant \ldots \geqslant \lambda_{ \min \left\{ n/2, p \right\} }$. In Figure~\ref{fig:q_demo_3}, when $\lambda \leqslant \lambda_3$ at subsample $\left( Y^1, X^1 \right)$, all three variables are selected in the solution path, implying that $\widehat{q}^1_i \geqslant 1/3$ for all variables. When $\lambda$ increases to $\lambda_2$, only $\{\mathbf{x}_3, \mathbf{x}_1\}$ survive the harsher shrinkage, implying that they should be ranked higher than $\mathbf{x}_2$. As a result, $\widehat{q}^1_1, \widehat{q}^1_3 \geqslant 2/3$ and $\widehat{q}^1_2 = 1/3$. When $\lambda$ reaches $\lambda_3$, only $\{\mathbf{x}_1\}$ remains, leaving $\widehat{q}^1_1 = 3/3$ and $\widehat{q}^1_3 = 2/3$. Applying the same method to each subsample produces the same $\widehat{q}$ as Algorithm~\ref{algo:APE-lar}.
 
-\subsection{Generalization to lasso variants}
+\subsection{Comparison and generalization to lasso variants \label{subsection:variant}}
 \label{subsec:variant}
 
-Because it is trained by least angle regression or coordinate descent, solar can easily be extended to several lasso variants:
+Because solar is trained by least angle regression or coordinate descent, it can easily be extended to several lasso variants:
 
 \begin{itemize}
   %
@@ -269,7 +314,7 @@ In this section, we use a series of examples to demonstrate the advantages of th
 
 \subsection{Post-selection hypothesis testing}
 
-A major advantage of solar is its amenability to post-selection testing. Because the lasso tests \citep{lockhartall14, taylor2014exact} are based on forward regression, they may be adapted to solar. More interestingly, it is straightforward to adapt the data-splitting tests \citep{wasserman2009high,meinshausen2009p} to solar. We illustrate this point using Example~1.
+A major advantage of solar is its amenability to post-selection testing. Because the lasso tests \citep{lockhartall14, taylor2014exact} are based on forward regression, they may be adapted to solar. More interestingly, it is straightforward to adapt the data-splitting tests \citep{wasserman2009high,meinshausen2009p} to solar for weak signal detection. We illustrate this point using Example~1.
 
 \smallskip
 \noindent
@@ -283,7 +328,7 @@ where $\mathbf{x}_i$, $i=0,\dots,p$, are standard Gaussian variables with pairwi
 
 Following \citet[Example~4.1]{romano2019multiple} and \citet{diciccio2020exact}, we conduct data-splitting tests by randomly separating the data into two portions of 50 observations. In the first round, one portion is used for solar or lasso selection and the other for testing. In the second round, the roles of the two portions are reversed. As a result, the p-values of any given variable are uncorrelated across the two rounds. Thus, we may apply Theorem~3.2 of \citet{romano2019multiple} and compute the average p-value across the two rounds to conduct a valid t-test for any selected covariate.
 
-\citet{diciccio2020exact} stresses the importance of retaining residual degrees of freedom to ensure accurate tests. Because solar yields sparse and accurate variable selection (Section~\ref{section:comp}), it conserves residual degrees of freedom, improving the reliability of post-selection p-values. Figure~\ref{fig:p_value_compare} plots the average p-values for the informative variables $\{\mathbf{x}_0,\ldots,\mathbf{x}_4\}$ from post-solar and post-lasso data-splitting tests using 100 repetitions. While the solar and lasso p-values are less than $0.05$ for the stronger signals $\{\mathbf{x}_1,\ldots,\mathbf{x}_4\}$, more than $25\%$ of the lasso p-values exceed $0.05$ for the weakest signal $\mathbf{x}_0$, implying non-trivial false non-rejection of $H_0$. By contrast, the solar p-value boxplot is very compact for $\mathbf{x}_0$, with only $5$ out of $100$ above $0.05$. Hence, solar p-values are more reliable for detecting weak signals with small $n$ and large $p$.
+\citet{diciccio2020exact} stresses the importance of retaining residual degrees of freedom to ensure accurate tests. Because solar yields a more sparse and accurate variable selection than lasso does(Section~\ref{section:comp}), it conserves residual degrees of freedom, improving the reliability of post-selection p-values. Figure~\ref{fig:p_value_compare} plots the average p-values for the informative variables $\{\mathbf{x}_0,\ldots,\mathbf{x}_4\}$ from post-solar and post-lasso data-splitting tests using 100 repetitions. While the solar and lasso p-values are less than $0.05$ for the stronger signals $\{\mathbf{x}_1,\ldots,\mathbf{x}_4\}$, more than $25\%$ of the lasso p-values exceed $0.05$ for the weakest signal $\mathbf{x}_0$, implying non-trivial false non-rejection of $H_0$. By contrast, the solar p-value boxplot is very compact for $\mathbf{x}_0$, with only $5$ out of $100$ above $0.05$. Hence, solar p-values are more reliable for detecting weak signals with small $n$ and large $p$.
 
 \begin{figure}[ht]
 %
@@ -297,7 +342,7 @@ Following \citet[Example~4.1]{romano2019multiple} and \citet{diciccio2020exact},
 %
 \end{figure}
 
-Moreover, the solar $L_0$ path may also assist with the formulation of $H_0$ for $p>n$. Because conserving residual degrees of freedom is so important, tests on the selection (omission) of redundant (informative) variables trigger decisions on which $\beta_i$ to test. \citet[Theorem~2]{zhang09} shows that the earlier a variable enters the $L_0$ path, the more likely it is informative, implying that variables should be tested in rank order. Given the solar ranking is more robust than lasso to settings of the irrepresentable condition, sampling noise, multicollinearity, and other issues, it is likely to provide more reliable guidance on the order to test the $\beta_i$. $\blacksquare$
+Moreover, the solar $L_0$ path may also assist with the formulation of $H_0$ for $p>n$. Because conserving residual degrees of freedom is so important, tests on the selection (omission) of redundant (informative) variables trigger decisions on which $\beta_i$ to test. \citet[Theorem~2]{zhang09} shows that the earlier a variable enters the $L_0$ path, the more likely it is informative, implying that variables should be tested in rank order. Given the solar path is more robust than lasso path to settings of the irrepresentable condition, sampling noise, multicollinearity, and other issues, it provides more reliable guidance on the order to test the $\beta_i$. $\blacksquare$
 
 
 \subsection{Complicated dependence structures\label{section:example}}
@@ -340,7 +385,7 @@ where $\mathbf{x}_1$ is unconditionally uncorrelated with $Y$, $\mathbf{x}_1$ an
   %
 \end{equation}
 %
-Note that $\mathbf{x}_1$ and $\mathbf{x}_2$ are both informative variables for $Y$. However, since $\mathbf{x}_1$ is unconditionally uncorrelated with $Y$ in the population, some post-lasso rules [such as the strong rule \citep{tibshirani2012strong} and the safe rule \citep{ghaoui2010safe}] may be prone to rejecting $\mathbf{x}_1$. For a given value of the shrinkage parameter $\lambda$ in grid search, the base strong rule and the safe rule for lasso to reject a selected variable, respectively, satisfies (\ref{eqn:safe_rule}) and (\ref{eqn:strong_rule}):
+Note that $\mathbf{x}_1$ and $\mathbf{x}_2$ are both informative variables for $Y$. However, since $\mathbf{x}_1$ is unconditionally uncorrelated with $Y$ in the population, the post-lasso rules [such as the strong rule \citep{tibshirani2012strong} and the safe rule \citep{ghaoui2010safe}] may be prone to rejecting $\mathbf{x}_1$. For a given value of the shrinkage parameter $\lambda$ in grid search, the base strong rule and the safe rule for lasso to reject a selected variable, respectively, satisfies (\ref{eqn:safe_rule}) and (\ref{eqn:strong_rule}):
 %
 \begin{eqnarray}
   %
@@ -528,17 +573,17 @@ Figure~\ref{fig:solar_ic_type-II} displays the simulation results. When $\mu \le
 
 \section{Solar advantages over subsample variable selection\label{section:comp}}
 
-In this section, we shift our focus to simulation. We demonstrate that: (i) solar offers significant improvements over lasso-type algorithms in terms of variable selection sparsity and accuracy; (ii)~replacing lasso with solar in subsample selection drastically reduces the computation load, measured by runtime. We choose the simulation settings so that, as far as possible, the comparisons are fair, representative, and generalizable. Our overall goal is to enable \emph{ceteris paribus} comparisons between solar and state-of-the-art lasso algorithms.
+In this section, we shift our focus to simulation. We demonstrate that: (i) solar offers significant improvements over lasso-type algorithms in terms of variable selection sparsity and accuracy; (ii)~replacing lasso with solar in bootstrap selection drastically reduces the computation load, measured by runtime. We choose the simulation settings so that, as far as possible, the comparisons are fair, representative, and generalizable. Our overall goal is to enable \emph{ceteris paribus} comparisons between solar and state-of-the-art lasso algorithms.
 
 \subsection{Simulation competitors}
 
 We consider a subset of lasso-type algorithms for comparison to solar. Firstly, some lasso modifications (e.g., fused lasso, grouped lasso) are designed to solve specific empirical problems that are not relevant to our paper. Secondly, it may be difficult to determine how much some variants outperform lasso.\footnote{For example, while \citet{jia2010model} show numerically that elastic net has slightly better variable-selection accuracy than lasso, they also find that ``when the lasso does not select the true model, it is more likely that the elastic net does not select the true model either'' (a point we verify in Section~\ref{section:application}). While simulations in \citet{zou2006adaptive} show that adaptive lasso outperforms lasso when $p/n<1$, it requires first computing the OLS estimates of all $\mathbf{x}_i$ coefficients, which is difficult when $p/n>1$.} Since both solar and lasso may be evaluated via least angle regression and coordinate descent, many other lasso modifications can be directly applied to solar, as discussed in Section~\ref{subsec:variant}. We do not consider information criteria for shrinkage parameter tuning. \citet{scikit-learn} points out that information criteria are over-optimistic and require a proper estimation of the degrees of freedom for the solution. Moreover, information criteria are derived asymptotically and tend to break down when the problem is badly conditioned (e.g., $p > n$).\footnote{See \url{https://scikit-learn.org/stable/modules/linear_model\#lasso.html} for details.}
 
-Solar competes with $K$-fold, cross-validated lasso (denoted `lasso' for short). Based on the \citet{friedman2001elements} simulations that show $K = 10$ balances the bias-variance trade-off in CV error minimization, we choose the number of CV folds and the number of subsamples generated in Algorithm~\ref{algo:APE-lar} to be $10$. Least-angle regression and coordinate descent yield almost identical selection results for solar and lasso. Hence, we combine lars and coordinate descent results for solar, ignore the coordinate descent lasso (available in the supplementary file), and report only the runtime comparison between least angle regression and coordinate descent.
+Solar competes with $10$-fold, cross-validated lasso (denoted `lasso' for short), following the \citet{friedman2001elements} simulations that show 10 folds balances the bias-variance trade-off in CV error minimization. We set the number of generated subsamples ($K$) in Algorithm~\ref{algo:APE-lar} to $3$ since $K>3$ has only negligible effects. Because least-angle regression and coordinate descent yield similar selection results for solar and lasso, we combine the lars and coordinate descent results for solar and report only the runtime for lars lasso (see Supplementary Material B).
 
-We also include bootstrap selection algorithms (aka bootstrap ensembles) in the comparisons. A bootstrap ensemble repeats lasso multiple times across bootstrap subsamples to produce a set of averaged (or accumulated) selection results. Given the similarities among lasso bootstrap ensembles, we choose the \citet{bach2008bolasso} bootstrap lasso (\emph{bolasso}) to be the competitor to solar. \citet{bach2008bolasso} proposes two bolasso algorithms: bolasso-H and bolasso-S; both are competitors in the simulations. Bolasso-H selects only variables that are selected in all bootstrap subsamples, i.e., the subsample selection frequency threshold, $f=1$. Bolasso-S selects variables that are selected in 90\% of the bootstrap subsamples ($f=0.9$). \citet{bach2008bolasso} finds that bolasso selection and prediction performance improves with the number of subsamples. To ensure a rigorous challenge for solar, we set the number of bootstrap subsamples in bolasso to $256$, the maximum in the \citet{bach2008bolasso} simulations.
+We also include bootstrap selection algorithms in the comparisons. A bootstrap selection repeats lasso multiple times across bootstrap subsamples to produce a set of averaged (or accumulated) selection results. Given the similarities among lasso bootstrap selection methods, we choose the \citet{bach2008bolasso} bootstrap lasso (\emph{bolasso}) to be the competitor to solar. \citet{bach2008bolasso} proposes two bolasso algorithms: bolasso-H and bolasso-S; both are competitors in the simulations. Bolasso-H selects only variables that are selected in all bootstrap subsamples, i.e., the subsample selection frequency threshold, $f=1$. Bolasso-S selects variables that are selected in 90\% of the bootstrap subsamples ($f=0.9$). \citet{bach2008bolasso} finds that bolasso selection and prediction performance improves with the number of subsamples. To ensure a rigorous challenge for solar, we set the number of bootstrap subsamples in bolasso to $256$, the maximum in the \citet{bach2008bolasso} simulations. Moreover, \citet{meinshausen2010stability} points out that bolasso relies on choosing the $\lambda$ value on bootstrap subsamples. If the $\lambda$ value is unecessarily large on more than $10\%$ of all bootstrap subsamples, bolasso-H and bolasso-S will omit informative variables. Given the fact that the optimal value of $\lambda$ may change substantially in high dimenisons, we use $10$-fold cross validation to tune $\lambda$ in each bootstrap subsample.
 
-We also consider a bootstrap solar ensemble \emph{(bsolar)}, which executes solar on each bootstrap subsample and computes the selection frequency for each variable across all bootstrap subsamples. To ensure that any performance difference is due to replacing lasso with solar in the ensemble system, bolasso and bsolar use the same subsample selection frequency threshold. Thus, we evaluate 2~versions of bsolar: bsolar-H ($f=1$) and bsolar-S ($f=0.9$). We use the notation bsolar-$m$H and bsolar-$m$S, where $m$ is the number of subsamples used to compute the selection frequency.
+We also consider a bootstrap solar selection \emph{(bsolar)}, which executes solar on each bootstrap subsample and computes the selection frequency for each variable across all bootstrap subsamples. To ensure that any performance difference is due to replacing lasso with solar in the bootstrap selection system, bolasso and bsolar use the same subsample selection frequency threshold. Thus, we evaluate 2~versions of bsolar: bsolar-H ($f=1$) and bsolar-S ($f=0.9$). We use the notation bsolar-$m$H and bsolar-$m$S, where $m$ is the number of subsamples used to compute the selection frequency.
 
 \subsection{Simulation settings}
 
@@ -562,15 +607,15 @@ To ensure a credible comparison between solar and the lasso competitors, we choo
 
 To maximize computation speed, we use \texttt{Numpy}, \texttt{Scipy}, and \texttt{Cython}---all well-known for performance and speed---to outsource all numerical and matrix operations to the Intel Math Kernel Library, currently the fastest and most accurate C++/Fortran library for CPU numerical operations.
 
-To reduce the possibility of CPU and RAM bottlenecks in parallel computing of lasso and bootstrap lasso, we code in Python rather than R. \citet{donoho201750} claims: ``R has the well-known reputation of being less scalable than Python to large problem sizes''. Given the simulations repeat solar, lasso, and bootstrap lasso many times to arrive at representative performance measures, choosing Python over R mitigates the impact of hardware limitations. Computations are executed with an Intel Xeon W-3245 CPU with 3.2GHz base frequency, 10-processor parallelization, and 64GB RAM, further reducing the possibility of CPU-RAM bottlenecks.
+To reduce the possibility of CPU and RAM bottlenecks in parallel computing of lasso and bootstrap lasso, we code in Python rather than R. \citet{donoho201750} claims: ``R has the well-known reputation of being less scalable than Python to large problem sizes''. Given the simulations repeat solar, lasso, and bootstrap lasso many times to arrive at representative performance measures, choosing Python over R mitigates the impact of hardware limitations. Computations are executed with an Intel Xeon W-3245 CPU with 3.2GHz base frequency and 64GB RAM, further reducing the possibility of CPU-RAM bottlenecks.
 
 To guarantee the programming quality of the lasso implementation, we source lasso and bootstrap lasso from the Sci-kit learn library \citep{scikit-learn} of efficient machine-learning tools.\footnote{Detail is available at \url{https://scikit-learn.org/stable/}.} Used widely in research and industry, Sci-kit learn also uses \texttt{Numpy}, \texttt{Scipy}, and \texttt{Cython} to delegate all numerical and matrix operations to Fortran/C++.
 
-Lastly, to optimize computation and avoid large overheads, we implement 10-processor parallelization. Because each realization of solar and CV-lasso requires 10 repetitions of lars or coordinate descent, optimization must be carried out sequentially, which means that each realization of solar or lasso must wait for the preceding realization to finish. Thus, we design a parallel architecture to assign one realization per CPU core. The design is optimized for a CPU with at least 10 cores and may generate an overhead with fewer cores. For example, in each realization, an 8-core CPU would assign two cores to training the second repetition of coordinate descent, with the other 6 cores left idle until the 10 repetitions were completed.
+Lastly, to optimize computation and avoid large overheads, we implement multi-core parallelization. Each realization of lasso requires 10 repetitions of lars or coordinate descent to compute the CV error of each $\lambda$ value. Thus, we design a parallel architecture to assign one repetition per CPU core, maximizing the computation speed for lasso.
 
-\subsection{Comparison of sparsity and accuracy \label{subsection:suml1}}
+\subsection{Comparison of sparsity, accuracy, and time complexity \label{subsection:suml1}}
 
-Table~\ref{table:sim_1} summarizes average selection performance.\footnote{Detailed histograms are available in the supplementary file.} While all the competitors always include the 5 informative variables, solar outperforms lasso in terms of sparsity in every $p/n$ scenario, implying superior ability to limit the selection of redundant variables. Notably, lasso sparsity deteriorates as $p/n\rightarrow1$, while solar sparsity improves over the same range. While the sparsity of all the competitors deteriorates as $\log(p)/n\rightarrow0$, solar maintains a clear advantage over lasso.
+Table~\ref{table:sim_1} summarizes average selection performance.\footnote{Detailed histograms are available in the supplementary file.} While all competitors always include the 5 informative variables, solar outperforms lasso in terms of sparsity in every $p/n$ scenario, implying superior ability to limit the selection of redundant variables. Notably, as $p/n\rightarrow1$, lasso sparsity deteriorates while solar sparsity improves, further confirming the advantage of path averaging. While the sparsity of all competitors deteriorates as $\log(p)/n\rightarrow0$, solar maintains a clear advantage over lasso.
 
 \begin{table}[ht]
 %
@@ -591,42 +636,58 @@ Table~\ref{table:sim_1} summarizes average selection performance.\footnote{Detai
   & \multicolumn{1}{c}{$\frac{400}{200}$} & \multicolumn{1}{c}{$\frac{800}{400}$} & \multicolumn{1}{c}{$\frac{1200}{600}$}  \\
   \midrule
   \multicolumn{9}{l}{\emph{mean number of selected variables}}\\
-  \hspace*{5mm}lasso        & 19.73 & 19.84 & 19.54 & 22.30 & 23.57 & 26.56 & 28.92 & 33.88 & 37.96 \\
-  \hspace*{5mm}solar        &  9.86 &  8.66 &  8.50 & 11.34 &  9.8  &  8.2  & 10.54 & 13.28 & 15.52 \\
+  \hspace*{5mm}lasso        & 20.4 & 19.5 & 19.7 & 23.1 & 24.1 & 27.2 & 30.7 & 36.7 & 37.4 \\
+  \hspace*{5mm}solar        & 10.5 &  9.3 &  9.1 & 10.7 &  9.8 &  8.7 & 11.4 & 16.1 & 18.5 \\
   \\ [-8pt]
-  \hspace*{5mm}bolasso-S    & 5.46  & 6.09  & 6.60  & 5.46  & 6.09  & 6.6   & 5.58  & 6.63  & 7.67  \\
-  \hspace*{5mm}bolasso-H    & 5     & 5.02  & 5.01  & 5     & 5.02  & 5.01  & 5     & 5.01  & 5.02  \\
+  \hspace*{5mm}bolasso-S    &  5.5 &  6.4 &  6.5 &  5.5 &  6.4 &  6.5 &  5.7 &  6.6 &  7.6 \\
+  \hspace*{5mm}bolasso-H    &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   \\
   \\ [-8pt]
-  \hspace*{5mm}bsolar-3S/3H & 5.44  & 5.18  & 5.22  & 5.44  & 5.18  & 5.22  & 5.25  & 5.86  & 6.09  \\
-  \hspace*{5mm}bsolar-5S/5H & 5.14  & 5.07  & 5.1   & 5.14  & 5.07  & 5.1   & 5.08  & 5.28  & 5.46  \\
-  \hspace*{5mm}bsolar-10S   & 5.12  & 5.04  & 5.04  & 5.12  & 5.04  & 5.04  & 5.05  & 5.24  & 5.39  \\
-  \hspace*{5mm}bsolar-10H   & 5.06  & 5.01  & 5     & 5.06  & 5.01  & 5     & 5.01  & 5.09  & 5.17  \\
+  \hspace*{5mm}bsolar-3S/3H &  5.4 &  5.2 &  5.1 &  5.4 &  5.2 &  5.1 &  5.3 &  5.8 &  6   \\
+  \hspace*{5mm}bsolar-5S/5H &  5.2 &  5.1 &  5   &  5.2 &  5.1 &  5   &  5.1 &  5.2 &  5.4 \\
+  \hspace*{5mm}bsolar-10S   &  5.2 &  5.1 &  5   &  5.2 &  5.1 &  5   &  5.1 &  5.2 &  5.3 \\
+  \hspace*{5mm}bsolar-10H   &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5.1 \\
   \\ [-8pt] \multicolumn{9}{l}{\emph{mean number of selected informative variables}}\\
-  \hspace*{5mm}lasso        & 5    & 5 & 5 & 5    & 5 & 5 & 5 & 5 & 5 \\
-  \hspace*{5mm}solar        & 5    & 5 & 5 & 5    & 5 & 5 & 5 & 5 & 5 \\
-  \hspace*{5mm}bolasso-S/H  & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 \\
+  \hspace*{5mm}lasso        &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   \\
+  \hspace*{5mm}solar        &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   \\
+  \hspace*{5mm}bolasso-S/H  &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   &  5   \\
   \hspace*{5mm}bsolar-3S/3H/5S/5H/10S/10H & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 & 5 \\
   \bottomrule
   \end{tabular}}
   %
 \end{table}
 
-Table~\ref{table:sim_1} also confirms the advantage of solar over lasso in bootstrap ensembles. Bolasso-S stands out with the poorest sparsity while the others perform almost identically. Recall that bolasso requires 256 subsample lasso repetitions compared with bsolar-3/5/10, which take only 3, 5, and 10 subsample solar repetitions, respectively. Hence, bsolar reduces subsample repetitions by 96\% relative to bolasso. As we show in Section~\ref{subsection:comp}, solar and lasso have identical computation loads. If time complexity decreases linearly, the 96\% reduction in subsample repetitions implies at least a 96\% reduction in computation time for solar relative to bolasso.
+Table~\ref{table:sim_1} also reveals several advantages of solar over lasso in bootstrap selections.
+%
+\begin{itemize}
+  %
+  \item In terms of variable selection, bolasso-S stands out with the poorest sparsity while the others perform almost identically.
+  %
+  \item Solar and bsolar exhibits a considerable computational advantage. We show in Section~\ref{subsection:comp} that solar imposes less than $1/3$ of the lasso computation load, implying that bsolar-3 has the same computation load as lasso. Given bolasso requires 256 subsample lasso repetitions while bsolar-3 has the same computation load as one lasso realization, bsolar reduces subsample repetitions by 99\% relative to bolasso (assuming a time complexity measure like $O(n^2)$ and $p>n$ for lasso).
+  %
+  \item Similar findings apply to the comparison between bsolar and lasso stability selection. Bsolar, bolasso-H, and stability selection ($f>0.9$) return very similar sparsity and accuracy (on average selecting all informative variables and very rarely including an redundant variable). However, lasso stability selection implements $100$ subsample repetitions respectively while bsolar-3 only requires $3$. Even though the size of the bootstrap subsample in stability selection is $n/2$ (substantially smaller than the bootstrap sample size of bsolar, which is $n$), the time complexity analysis of \citet{meinshausen2010stability} still implies that bsolar-3 produces a reduction of at least $67$-$82\%$ in computation load relative to lasso stability selection. Such amount of computation time reduction is crucial in large scale applications like DNA sequencing, natural language processing, imagine processing, and MRI neuroimaging [where each observation (image) often contains more than $10^6$ pixels as candidate variables, and the total data size can easily go beyond 1GB even with limited $n$.]. The amount of computation reduction can be even more substantial if the application requires a certain lasso/solar variation like "group", "fused", or "elastic net" (discussed in Section~\ref{subsection:variant}).   
+  %
+\end{itemize}
 
 \subsection{Explanation of the efficiency discrepancy between bolasso-bsolar}
 
-The efficiency of bsolar is due to its unique, intrinsic multi-layer variable ranking scheme. While bsolar and bolasso both generate bootstrap subsamples, bsolar uses a different bootstrap variable selection procedure. Specifically,
+The efficiency of bsolar is due to its unique multi-layer variable ranking scheme. While bsolar and bolasso both generate bootstrap subsamples, bsolar uses a different bootstrap variable selection procedure. Specifically,
 
 \begin{itemize}
 
-  \item     solar executes Algorithm~\ref{algo:APE-lar} or \ref{algo:APE-cd} on each bootstrap subsample and ranks variables using the average $L_0$ path, which we call the \emph{internal ranking}. The internal ranking identifies the strongest signals on each bootstrap subsample.
+  \item     solar executes Algorithm~\ref{algo:APE-lar} (or \ref{algo:APE-cd}) on each bootstrap subsample and ranks variables using the average $L_0$ path, which we call the \emph{internal ranking}. The internal ranking identifies the strongest signals on each bootstrap subsample.
 
-  \item     bsolar collects the internal ranking results to produce an overall ranking, which we call the \emph{external ranking}. The external ranking identifies the strongest signals on the majority of bootstrap subsamples.
+  \item     bsolar collates the internal ranking results to produce an overall ranking, which we call the \emph{external ranking}. The external ranking identifies the strongest signals on the majority of bootstrap subsamples.
 \end{itemize}
 
-Compared to the usual (one-layer) ranking methods \citep{fan2008sure, hall2009usingb, hall2009using, li2012robust, li2012feature}, our multi-layer method balances efficiency, robustness, and stability. First, one-layer methods rank variables on the whole sample. By contrast, the internal ranking uses the average $L_0$ path, which, as discussed in Section~2.1, improves robustness to multicollinearity, noise, and sample size. Second, one-layer methods select variables immediately after ranking; our method performs a second external ranking that focuses on the signals that are persistently strong regardless of sampling variation. Third, as shown in Section~\ref{section:example}, internal ranking avoids issues caused by complicated dependence structures that other (unconditional) ranking methods cannot.
-
-Furthermore, research shows the clear efficiency advantage of one-layer variable ranking methods, especially with large $p$ and $n$. Hence, by embedding ranking into bootstrap variable selection, bsolar reduces the number of bootstrap repetitions required by bolasso. Moreover, as shown in Table~\ref{table:subsample_select_freq}, bsolar produces a shorter and more accurate list of subsample variable selection frequencies.
+The multi-layer method has several advantages over the usual one-layer ranking methods, such as bootstrap lasso and lasso stability selection \citep{fan2008sure, hall2009usingb, hall2009using, li2012robust, li2012feature}.
+\begin{itemize}
+  %
+  \item First, one-layer methods rank variables on the whole sample. By contrast, the internal ranking uses the average $L_0$ path, which, as discussed in Section~2.1, improves robustness to multicollinearity, noise, and sample size.
+  %
+  \item Second, as shown in Section~\ref{section:example}, internal ranking avoids issues caused by complicated dependence structures that other (unconditional) ranking methods cannot.
+  %
+  \item Most important, multi-layer ranking reduces the number of bootstrap repetitions without compromising accuracy. One-layer methods select variables immediately after ranking. Our method performs a second external ranking that, by detecting persistent signals, is more tolerant of subsample variation: if $\mathbf{x}_i$ is wrongly selected or omitted in the internal ranking, there is still a large probability that the mistake will be corrected in the external ranking. While stability selection and bolasso require, respectively, 100 and 256 repetitions to average out lasso selection issues, bsolar requires only 3-10 bootstrap repetitions to confirm the solar variable ranking.
+\end{itemize}
 
 
 \begin{table}[!htb]
@@ -669,59 +730,63 @@ Furthermore, research shows the clear efficiency advantage of one-layer variable
   \end{minipage}
 \end{table}
 
-Table~\ref{table:subsample_select_freq} illustrates numerically how efficient multi-layer ranking is. Table~\ref{table:subsample_select_freq_1} breaks down the subsample selection frequency list from 256 subsamples for one bolasso realization with $p/n=100/200$. Due to the length of the list, we report only subsample selection frequencies $\ge0.69$. With only one layer of ranking, bolasso is unable to separate informative from redundant variables even with 256 subsample repetitions. The frequency discrepancy for bolasso between the highest-ranking redundant ($\mathbf{x}_{28}$) and the lowest-ranking informative variable ($\mathbf{x}_0$) is only $0.12$. By contrast, Table~\ref{table:subsample_select_freq_2} shows bsolar-10 returns a much shorter list with a frequency discrepancy between the highest-ranking redundant ($\mathbf{x}_{91}$) and the lowest-ranking informative variable ($\mathbf{x}_0$) of $0.9$. To increase the discrepancy between the lowest ranked informative and highest ranked redundant variables for bolasso, \citet{bach2008bolasso} suggests raising the number of subsample repetitions. However, increasing repetitions will raise the bolasso computation load in high-dimensional spaces, increasing the advantage of bsolar.
+Furthermore, as shown in Table~\ref{table:subsample_select_freq}, bsolar produces a shorter and more accurate list of subsample variable selection frequencies. Table~\ref{table:subsample_select_freq_1} breaks down the subsample selection frequency list from 256 subsamples for one bolasso realization with $p/n=100/200$. Due to the length of the list, we report only subsample selection frequencies $\ge0.69$. With only one layer of ranking, bolasso is unable to separate informative from redundant variables even with 256 subsample repetitions. The frequency discrepancy for bolasso between the highest-ranking redundant ($\mathbf{x}_{28}$) and the lowest-ranking informative variable ($\mathbf{x}_0$) is only $0.12$. By contrast, Table~\ref{table:subsample_select_freq_2} shows bsolar-10 returns a much shorter list with a frequency discrepancy between the highest-ranking redundant ($\mathbf{x}_{91}$) and the lowest-ranking informative variable ($\mathbf{x}_0$) of $0.9$. To increase the discrepancy between the lowest ranked informative and highest ranked redundant variables for bolasso, \citet{bach2008bolasso} suggests raising the number of subsample repetitions. However, increasing repetitions will raise the bolasso computation load in high-dimensional spaces, increasing the advantage of bsolar.
 
-\subsection{Computation load comparison \label{subsection:comp}}
+\subsection{Computation time comparison \label{subsection:comp}}
 
-Since the computation load for lars or coordinate descent on a given sample is fixed, we may use the number of lars or coordinate descents to approximate the computation load for solar and lasso. For comparison, we compute solar with $K$ subsamples and lasso with $K$-fold cross-validation. As shown in Algorithm~\ref{algo:APE-lar} and \ref{algo:APE-cd}, solar computes one lars or coordinate descent on each subsample $(X^k, Y^k)$, which implies $K$ lars or coordinate descents to compute $\widehat{q}$ and one more pass to compute $c^*$ for variable selection. Lasso also requires computing $K$ lars or coordinate descents to optimize the tuning parameter and, given the optimal tuning parameter, one more pass on the full sample to select variables. Thus, solar and lasso have the same computation load.
+The time complexity of an algorithm indicates only how computation time changes as data size (parameterized by $n$, $p$, and $K$) increases. Time complexity analysis omits many other computation parameters (such as hardware specification), suggesting it may substantially underestimate computation time difference of two algorithms in real-world problems. Hence, in this section we compare computation efficiency in terms of CPU times.
 
-Given equal computation loads for lasso and solar, differences between bolasso and bsolar are due primarily to the number of subsample repetitions (SR). Solar and lasso have a computation load of $1$ SR, bolasso has a load of $256$ SR, and bsolar-3/5/10 has a load of $3/5/10$ SR.
+Since the computation load for lars or coordinate descent on a given sample is fixed, we may use the number of lars or coordinate descents to approximate the computation load for solar and lasso. For comparison, we compute solar with $K$ subsamples and lasso with $K$-fold cross-validation. As shown in Algorithm~\ref{algo:APE-lar} and \ref{algo:APE-cd}, solar computes one lars or coordinate descent on each subsample $(X^k, Y^k)$, which implies $K=3$ lars or coordinate descents to compute $\widehat{q}$ and one more pass to compute $c^*$ for variable selection. Lasso requires computing $K=10$ lars or coordinate descents to optimize the tuning parameter and, given the optimal tuning parameter, one more pass on the full sample to select variables. Thus, the solar computation load is less than $1/3$ that of lasso.
+
+Given the computation loads for lasso and solar, we can work out the differences between bolasso and bsolar using the number of subsample repetitions (SR). Bolasso repeats lasso $256$ times while bolar-3 repeats solar only 3 times to obtain similar sparsity, bsolar-3 has approximately the same computation load as lasso.
 
 \begin{table}[ht]
 %
 %\small
 \centering
 %
-\caption{Simulation results for computation load (mean runtime in seconds).\label{table:sim_load}}
+\caption{Simulation results for parallel computation time (mean runtime in seconds).\label{table:sim_load}}
 \smallskip
 %
 \resizebox{0.98\textwidth}{!}{%
 \renewcommand{\arraystretch}{0.7}
-\begin{tabular}{ll.........}
+\begin{tabular}{l ... ... ...}
   \toprule
-        &
         & \multicolumn{3}{c}{$p/n\rightarrow0$}
         & \multicolumn{3}{c}{$p/n\rightarrow1$}
         & \multicolumn{3}{c}{$\log(p)/n\rightarrow0$} \\
-        \cmidrule(lr){3-5} \cmidrule(lr){6-8} \cmidrule(lr){9-11}
-        &                              & \multicolumn{1}{c}{$\frac{100}{100}$} & \multicolumn{1}{c}{$\frac{100}{150}$} & \multicolumn{1}{c}{$\frac{100}{200}$} & \multicolumn{1}{c}{$\frac{150}{100}$} & \multicolumn{1}{c}{$\frac{200}{150}$} & \multicolumn{1}{c}{$\frac{250}{200}$} & \multicolumn{1}{c}{$\frac{400}{200}$} & \multicolumn{1}{c}{$\frac{800}{400}$} & \multicolumn{1}{c}{$\frac{1200}{600}$}  \\
+        \cmidrule(lr){2-4} \cmidrule(lr){5-7} \cmidrule(lr){8-10}
+        & \multicolumn{1}{c}{$\frac{100}{100}$} & \multicolumn{1}{c}{$\frac{100}{150}$} & \multicolumn{1}{c}{$\frac{100}{200}$} & \multicolumn{1}{c}{$\frac{150}{100}$} & \multicolumn{1}{c}{$\frac{200}{150}$} & \multicolumn{1}{c}{$\frac{250}{200}$} & \multicolumn{1}{c}{$\frac{400}{200}$} & \multicolumn{1}{c}{$\frac{800}{400}$} & \multicolumn{1}{c}{$\frac{1200}{600}$}  \\
   \midrule
-  & bsolar-3               & 0.11  & 0.16  & 0.15  & 0.10  & 0.15  & 0.22  & 0.41  & 0.74   & 1.48   \\
-                  & bolasso (lars, 256 SR) & 9.52  & 12.49 & 10.61 & 10.01 & 13.92 & 19.72 & 23.10 & 184.59 & 502.56 \\
-                  & bolasso (cd,   256 SR) & 13.49 & 60.51 & 60.35 & 13.92 & 16.85 & 20.17 & 27.73 & 100.58 & 308.12 \\
+  bsolar-3               & 0.05  & 0.07  & 0.08  & 0.06  & 0.08  & 0.12  & 0.32  & 0.51   & 1.04   \\
+  bolasso (lars, 256 SR) & 9.52  & 12.49 & 10.61 & 10.01 & 13.92 & 19.72 & 23.10 & 184.59 & 502.56 \\
+  bolasso (cd,   256 SR) & 13.49 & 60.51 & 60.35 & 13.92 & 16.85 & 20.17 & 27.73 & 100.58 & 308.12 \\
   \bottomrule
   \end{tabular}}
   %
 \end{table}
 
-Table~\ref{table:sim_load} shows the average runtime for the simulations. Bsolar-3 has a much shorter runtime than bolasso. The runtime differences are even more pronounced when $p$ and $n$ increase. The 256 subsample repetitions render the bolasso selection algorithms computationally infeasible even with moderate $p$ and $n$. By contrast, bsolar-3 requires only 30 realizations of lars or coordinate descent. Due to a lighter computational load and CPU usage, bsolar-3 allows the CPU to work at a higher frequency than bolasso, decreasing the runtime for each lars realization.
+Table~\ref{table:sim_load} shows the average runtimes for the simulations. Generally speaking, bsolar-3 has a much shorter runtime than bolasso. When $n \times p$ is small (the first 5 columns), bsolar-3 runtime is roughly $0.5$-$1\%$ of bolasso runtime (assuming bolasso is solved by lars), which is consistent with the time complexity estimation. However, as $n$ and $p$ increase rapidly, parallel computation of bolasso is substantially more difficult to coordinate. This is primarily because our CPU must simultaneously generate 10-16 (the number of CPU cores) data matrices $X\in \mathbb{R}^{1200 \times 600}$, each of which must then be bootstrapped into 256 sub-matrices $X_{sub}\in \mathbb{R}^{1080 \times 600}$ for each CPU core to read again in parallel. This volume of data is more than our CPU can read from RAM in a single pass. As a result, the runtime differences are even more pronounced when $p$ and $n$ increase. The 256 subsample repetitions (totally 2816 lars or coordinate descent reptitions) render the bolasso selection algorithms computationally infeasible even with moderate $p$ and $n$. By contrast, bsolar-3 requires only 9 realizations of lars or coordinate descent. Due to a lighter computational load and CPU usage, bsolar-3 parallel computing is much easier to coordinate. As a result, the computation time difference will be much more substantial if the number of CPU cores is below $8$.
 
 \subsubsection{Comparison with previous lasso computation research}
 
-\hl{The bolasso findings are consistent with earlier research on lasso}. Given the same convergence criteria (tolerance for optimization and maximum number of iterations), number of folds for CV ($K=10$), and number of $\lambda$s in the grid search (100), the time complexity of lasso is mostly determined by $n$, $p$, and pairwise correlations among the covariates ($corr$). For the purposes of comparison, we consider a Gaussian regression with $p/n=1000/100$ and $corr=0.5$.
+We thoroughly demonstrate the solar computation advantages in bootstrap selection in two steps. Firstly we show that, for given computation resources, our bolasso package almost attains the theoretical maximum speedup for lasso parallelization. Secondly, we show that bsolar is substantially faster than our bolasso package. Thus, given the computation resources, the speed of bsolar substantially exceeds the theoretical maximum speed of bolasso.
+
+Given the same convergence criteria (tolerance for optimization and number of iterations), number of folds for CV ($K=10$), and number of $\lambda$s in the grid search (100), the time complexity of lasso is mostly determined by $n$, $p$, and pairwise correlations among the covariates ($corr$). For the purposes of comparison, we consider a Gaussian regression with $p/n=1000/100$ and $corr=0.5$.
 
 \begin{itemize}
   %
-  \item  \citet[Table 1]{friedman2010regularization} shows that, on a 2-core Intel Xeon CPU with 2.8GHz frequency, the average runtime is 0.07 seconds for one pathwise coordinate descent realization (with covariance pre-computed for updating).\footnote{Our 2-core R replications are around 0.01 seconds slower than \citet{friedman2010regularization} on a CPU with 3.2GHz frequency. Because we lack configuration details on the interpreters and compilers \citet{friedman2010regularization} used for R, openBLAS, Fortran, and C++, we use their average runtime of 0.07 seconds for comparison.} Their package is coded in R and all numerical computations are executed in Fortran/C++.
+  \item With a 2.8GHz frequency, 2-core Intel Xeon CPU,
+      \citet[Table 1]{friedman2010regularization} method reports an average runtime of 0.07 seconds for one pathwise coordinate descent realization (with covariance pre-computed for updating). The \citet{friedman2010regularization} package is coded in R with all numerical computations executed in Fortran/C++.
   %
-  \item  Using an Intel Xeon W-3245 CPU with 3.2GHz frequency and 16 cores, the average runtime for the coordinate descent bolasso package is 41.92 seconds (with covariance pre-computed automatically), accounting for 256 realizations of 10-fold, cross-validated lasso (namely 2,816 pathwise coordinate descent realizations). Thus, the average runtime is 0.014 seconds per pathwise coordinate descent.
+  \item Using an Intel Xeon W-3245 CPU with 3.2GHz frequency and 16 cores, the average runtime for the coordinate descent bolasso package is 41.92 seconds (with covariance pre-computed automatically), accounting for 256 realizations of 10-fold, cross-validated lasso (namely 2,816 pathwise coordinate descent realizations). Thus, the average runtime is 0.014 seconds per pathwise coordinate descent.
   %
 \end{itemize}
 
 \noindent
-Thus, with a similar CPU frequency and 14 additional cores, our implementation produces an average speedup of $0.07/0.014=5$ times over \citet{friedman2010regularization} for each pathwise coordinate descent repetition.
+Thus, with a similar CPU frequency and 14 additional cores, our lasso implementation produces an average speedup of $0.07/0.014=5.0$ times over \citet{friedman2010regularization} for each pathwise coordinate descent repetition.
 
-This speedup almost reaches the theoretical maximum speedup from 2 to 16 cores predicted by Amdahl's law. Our code and that of \citet{friedman2010regularization} apply the same design to cross-validated lasso: 10 (parallelizable) pathwise coordinate descent repetitions to optimize $\lambda$ followed by a final (non-parallelizable) step to compute $\beta$. Roughly 11\% of the total computations (I/O, code interpretation to C++/Fortran, data generation, etc., matrix manipulation, and the step to compute $\beta$) are not parallelizable. Given $n$ and $p$, the maximum speedup according to Amdahl's law is:
+Our code and the \citet{friedman2010regularization} code use the same design: 10 (parallelizable) pathwise coordinate descent repetitions to optimize $\lambda$ followed by a final (non-parallelizable) step to compute $\beta$. Roughly 11\% of the total computations (I/O, code interpretation to C++/Fortran, data generation, etc., matrix manipulation, and the step to compute $\beta$) are not parallelizable. Given $n$ and $p$, the maximum speedup according to Amdahl's law is:
 %
 \begin{equation}
   %
@@ -729,7 +794,7 @@ This speedup almost reaches the theoretical maximum speedup from 2 to 16 cores p
   %
 \end{equation}
 %
-where $\rho$ is the proportion of computation that is not parallelizable and $s$ is the computation speedup for the parallelizable proportion (i.e., the core number multiple). Given that our CPU base frequency is also higher than \citet[Table 1]{friedman2010regularization} ($3.2$GHz over $2.8$GHz), we adjust the maximum speedup by the frequency multiple ($3.2/2.8$), resulting in a final maximum speedup of $4.5 \times 3.2/2.8 \approx 5.2$, or 4\% faster than our speedup. Thus, our coordinate descent bolasso package achieves almost 96\% of the maximum possible speedup, implying little room for further parallelization improvements.
+where $\rho$ is the proportion of computation that is not parallelizable and $s$ is the computation speedup for the parallelizable proportion (i.e., the core number multiple). Given that our CPU base frequency is also higher than \citet{friedman2010regularization} ($3.2$GHz over $2.8$GHz), we adjust the maximum speedup by the frequency multiple ($3.2/2.8$), resulting in a final maximum speedup of $4.5 \times 3.2/2.8 \approx 5.2$, or 4\% faster than our speedup of 5.0. Hence, given the core number and CPU frequency, our coordinate descent bolasso package achieves almost 96\% of the maximum possible speedup.
 
 \begin{figure}[ht]
   %
@@ -743,7 +808,11 @@ where $\rho$ is the proportion of computation that is not parallelizable and $s$
   %
 \end{figure}
 
-Nonetheless, bolasso still requires a large computation time with $p/n=1200/600$ due to the $256$ CV-lasso repetitions, once again confirming the bsolar computation advantage. Figure~\ref{fig:runtime} plots average runtime against the size of the $X$ matrix. As matrix size increases, bsolar runtime increases linearly while bolasso rises exponentially, confirming the bsolar-3 advantage for high-dimensional data.
+As illustrated in Figure~\ref{fig:runtime}, bsolar easily outmatches the theoretical maximum speedup for paral- lelizing lasso-type estimators as n and p increases. Figure~\ref{fig:runtime} plots average runtime against the size ($n \times p$) of the $X$ matrix. As matrix size increases, the optimized bolasso package runtime rises exponentially while bsolar runtime increases linearly. Thus, bsolar easily outmatches the theoretical maximum speedup for bolasso as $n$ and $p$ increase, confirming the bsolar-3 advantage for high-dimensional data.
+
+\subsubsection{Implication of solar computation advantages}
+
+The efficiency of bsolar computation solves the issue of choosing a bootstrap variable selection threshold. \citet{bach2008bolasso} and \citet{meinshausen2010stability} claim that choosing a predefined value for the selection threshold ($f=1$, $0.9$, or $f\in\left[0.6,0.9\right]$) will return similarly sparse results. However, \citet{bach2008bolasso} and \citet{huang2014stat} show that predefined values may cause problems for variable selection. With $p/n=50/500$, $\mathrm{sd}(e)=3$, and true signal strength around $2$, \citet{huang2014stat} finds a 50\% false discovery rate with bootstrap selection methods, suggesting that the threshold still requires data-driven tuning. Moreover, the large number of bootstrap repetitions makes traditional parameter tuning methods (such as cross validation) computationally unaffordable for stability selection or bolasso. By contrast, the bsolar algorithm is efficient with even large $p,n$. The efficiency of bsolar means it is possible to tune $f$ by cross validation with a runtime of less than $6$ seconds for $p/n=1200/600$.
 
 \section{Real-world data: Sydney house price prediction\label{section:application}}
 
@@ -761,9 +830,11 @@ Table~\ref{table:house_variable} shows the selection comparison across the elast
 
 \section{Conclusion}
 
-\hlgreen{In this paper} we propose a new algorithm for high-dimensional data called solar (subsample-ordered least-angle regression). We show that solar yields substantial improvements over lasso in terms of the sparsity, stability, accuracy, and robustness of variable selection. We also illustrate analogous improvements from solar ensembles relative to lasso ensembles.
+In this paper we propose the solar (subsample-ordered least-angle regression) algorithm for high-dimensional data. Solar constructs solution paths using the $L_0$ norm and averages the resulting solution paths across subsamples, reducing sensitivity to high dimensionality while improving variable selection stability, efficiency, and accuracy. We prove that $L_0$ path averaging separates informative from redundant variables, that solar variable selection is consistent, and that the probability that solar omits weak signals is controllable for finite sample size.
 
-Detection of weak signals is a potential weakness evident in solar, although relative to the lasso competitor the difference is very slight. Nonetheless, we are working on an extension to solar, the double-bootstrap solar (DBsolar), which, if early results are any indication, promises to enable solar accurately to detect variables with weak signals.
+Through simulations, examples, and real-world data, we demonstrate that, without any increase in computation load, solar yields substantial improvements over lasso in terms of the sparsity, stability, and accuracy of variable selection. We also find that solar largely avoids selection of redundant variables and rejection of informative variables in the presence of complicated dependence structures and harsh settings of the irrepresentable condition while conserving residual degrees of freedom for hypothesis testing. Relative to bootstrap lasso, bootstrapping solar improves selection sparsity and ranking accuracy and, for given computation resources, is substantially faster.
+
+Detection of weak signals is a potential weakness in solar, although relative to lasso the difference is very slight. Nonetheless, we are working on an extension to solar, the double-bootstrap solar (DBsolar), which, if early results are any indication, promises to enable solar accurately to detect variables with weak signals.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%% References %%%%%%%%%%%
@@ -934,10 +1005,12 @@ Detection of weak signals is a potential weakness evident in solar, although rel
 \end{table}
 
 \clearpage
+\appendixpagenumbering
+
 \begin{appendices}
 \section{$L_0$ path ranking accuracy and variable selection consistency}
 
-For generality, we derive the theoretical properties of solar under the general forward selection framework of \citet[Figure~1]{zhang09}. Our proof method is summarized as follows. Under various settings and assumptions, \citet{tropp2004greed}, \citet{yuan2007non}, \citet{wainwright2009sharp}, \citet{zhang09}, and \citet{ing2011stepwise} have shown: (i) forward selection is consistent in different modes, and (ii) informative variables are ranked higher at earlier stages of the solution path than redundant variables. Since the $L_0$ path on each solar subsample is essentially the re-parameterized forward selection path, (i) and (ii) can be applied directly to the $L_0$ path on each solar subsample. As a result, we can build a probabilistic lower bound to show that, on average, (i) and (ii) also hold for the average $L_0$ path and for the variable selection result on the average $L_0$ path (including solar variable selection). \hl{We follow the methods of} \citet{tropp2004greed}, \citet{wainwright2009sharp}, and \citet{zhang09}, \hl{since their assumptions and analysis methods are similar to the theoretical analysis of lasso-type estimators.} We follow the \citet{zhang09} notation.
+For generality, we derive the theoretical properties of solar under the general forward selection framework of \citet[Figure~1]{zhang09}. Our proof method is summarized as follows. Under various settings and assumptions, \citet{tropp2004greed}, \citet{yuan2007non}, \citet{wainwright2009sharp}, \citet{zhang09}, and \citet{ing2011stepwise} have shown: (i) forward selection is consistent in different modes, and (ii) informative variables are ranked higher at earlier stages of the solution path than redundant variables. Since the $L_0$ path on each solar subsample is essentially the re-parameterized forward selection path, (i) and (ii) can be applied directly to the $L_0$ path on each solar subsample. As a result, we can build a probabilistic lower bound to show that, on average, (i) and (ii) also hold for the average $L_0$ path and for the variable selection result on the average $L_0$ path (including solar variable selection). We follow the approach of \citet{tropp2004greed}, \citet{wainwright2009sharp}, and \citet{zhang09}, because their assumptions and methods of analysis are similar to the theoretical analysis of lasso-type estimators. We follow the \citet{zhang09} notation.
 
 \begin{definition}
   Consider the regression model $Y = X\beta + \mathbf{e}$, \label{def:notation}
@@ -1112,7 +1185,7 @@ where $u^{\left( l^k \right)}$ is the regression residual and $\mathbf{x}^{ \lef
     \omega^{\left(l^k - 1\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}.
   \end{displaymath}
   %
-  \item Assume $\omega^{\left(\bigcdot\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ is not violated until stage $l^k$. This implies that we have $\omega^{\left(l^k - 1 \right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$. Besides, since $\omega^{\left(\bigcdot\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ for the first $l^k-1$ stages, there exists some $\epsilon^*$ such that 
+  \item Assume $\omega^{\left(\bigcdot\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ is not violated until stage $l^k$. This implies that we have $\omega^{\left(l^k - 1 \right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$. Besides, since $\omega^{\left(\bigcdot\right)} > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ for the first $l^k-1$ stages, there exists some $\epsilon^*$ such that
   %
   \begin{equation}
     %
@@ -1129,7 +1202,7 @@ where $u^{\left( l^k \right)}$ is the regression residual and $\mathbf{x}^{ \lef
 Hence, `the $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln \left(4p / \eta \right)}$ stopping rule stops forward selection at stage $l^k$' is equivalent to `the last variable that forward selection selects before stop has its $\omega$ larger than $\frac{1}{1-\mu_{X}\left(F\right)}\sigma\sqrt{2\ln\left(4p/\eta\right)}$'. As such, we can re-parameterize the stopping rule on $\left(Y^{k},X^{k}\right)$ based on $\widehat{q}_{i}^{k}$ as follows
 %
 \begin{definition}
-  (The $\epsilon$ and $\widetilde{q}^k$ stopping assumptions) \label{def:stopping assumption}
+  (The $\epsilon$ and $\widehat{q}^{\,k}$ stopping assumptions) \label{def:stopping assumption}
 \end{definition}
 
 \begin{itemize}
@@ -1143,7 +1216,7 @@ Hence, `the $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln
     %
   \end{eqnarray}
   %
-  \item Assume forward selection only selects $\left\{ \mathbf{x}_j:\widehat{q}_j^k > \frac{\widetilde{p} + 1 - l^k} {\widetilde{p}} \right\}$ on subsample $\left(Y^k, X^k \right)$. We define 
+  \item Assume forward selection only selects $\left\{ \mathbf{x}_j:\widehat{q}_j^k > \frac{\widetilde{p} + 1 - l^k} {\widetilde{p}} \right\}$ on subsample $\left(Y^k, X^k \right)$. We define
   %
   \begin{displaymath}
     %
@@ -1153,7 +1226,7 @@ Hence, `the $\epsilon > \frac{1}{1 - \mu_X \left( F \right)} \sigma \sqrt{ 2 \ln
   %
   For simplicity, we denote $\omega$ as $\omega^{\left( \bigcdot \right)}$ of the last variable that forward selection selects.
   %
-  \item we refer to the following equivalent assumption for solar as \emph{the $\widetilde{q}^k$ stopping assumption}:
+  \item we refer to the following equivalent assumption for solar as \emph{the $\widehat{q}^{\,k}$ stopping assumption}:
   %
   \begin{align}
     %
@@ -1176,10 +1249,10 @@ Based on Definition~\ref{def:stopping assumption}, we can re-parameterize Theore
   \end{displaymath}
   then
   \begin{displaymath}
-      \overline{F}=\left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>\widetilde{q}^{k}\right\}.
+      \overline{F}=\left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>c^k\right\}.
   \end{displaymath}
   %
-  where $\widetilde{q}^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
+  where $c^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
   %
   \label{lemma:1}
   %
@@ -1198,7 +1271,7 @@ since (\ref{eqn:omega_epsilon}) implies that $\exists \epsilon > \frac{1}{1-\mu_
 
 %%%%%%%%%%%% step 2 %%%%%%%%%%%%
 
-\subsection*{Step 2 : averaging performance}
+\subsection*{Step 2 : averaging the solution paths}
 
 Since we assume the nonzero $\overline{\beta}_i$ are the first $p_1$ components of $\overline{\beta}$, x can be rewritten as
 %
@@ -1210,23 +1283,23 @@ Since we assume the nonzero $\overline{\beta}_i$ are the first $p_1$ components 
   then
   \[
   \begin{cases}
-      \widehat{q}_j^k \leqslant \widetilde{q}^k, \; \forall j\leqslant p_1\\
-      \widehat{q}_j^k > \widetilde{q}^k, \; \forall j>p_1.
+      \widehat{q}_j^k \leqslant c^k, \; \forall j\leqslant p_1\\
+      \widehat{q}_j^k > c^k, \; \forall j>p_1.
   \end{cases}
   \]
-  where $\widetilde{q}^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
+  where $c^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
   %
   \label{lemma:2}
   %
 \end{lemma}
 %
 \noindent
-Lemma~\ref{lemma:2} \hl{direcly implies that, with large probability, you can find a theshold value $\widetilde{q}^k$ on the $L_0$ path that perfectly seperates the informative from the redundant.}
+Lemma~\ref{lemma:2} directly implies that, with high probability, you can find a threshold value $c^k$ on the $L_0$ path that perfectly separates the informative from the redundant variables.
 
 To accommodate multiple subsamples in the average $L_0$ path, we define the $\widehat{q}$ stopping rule by slightly modifying (\ref{eqn:qk_stopping}).
 %
 \begin{definition}
-  (The assumption for the $\widetilde{q}$ stopping rule). We refer to the following rule as \emph{the $\widetilde{q}$ stopping assumption} for the average $L_0$ path:
+  (The assumption for the $\widehat{q}$ stopping rule). We refer to the following rule as \emph{the $\widehat{q}$ stopping assumption} for the average $L_0$ path:
   %
   \begin{eqnarray}
     %
@@ -1241,7 +1314,7 @@ To accommodate multiple subsamples in the average $L_0$ path, we define the $\wi
 \end{definition}
 \medskip
 
-Lemma~\ref{lemma:3} follows from the $\widetilde{q}$ stopping assumption.
+Lemma~\ref{lemma:3} follows from the $\widehat{q}$ stopping assumption.
 
 \begin{lemma}
   Consider the forward selection algorithm on the average $L_{0}$ path with Assumption 1 satisfied. With probability less than $\eta$, if (\ref{eqn:q_hat_stopping}) is satisfied and
@@ -1251,32 +1324,32 @@ Lemma~\ref{lemma:3} follows from the $\widetilde{q}$ stopping assumption.
   then
   \[
   \begin{cases}
-      \frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}>\widetilde{q}^{*},\forall i\leqslant p_{1}\\
-      \frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}\leqslant\widetilde{q}^{*},\forall i>p_{1}
+      \frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}> c^* ,\forall i\leqslant p_{1}\\
+      \frac{1}{K}\sum\widehat{q}_{i}^{k}=\widehat{q}_{i}\leqslant c^*,\forall i>p_{1}
   \end{cases}
   \]
-  where $\widetilde{q}^* = \frac{1}{n} \sum_k^K \widetilde{q}^k / K$ and $\widetilde{q}^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
+  where $c^* = \frac{1}{K} \sum_k^K c^k / K$ and $c^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
   %
   \label{lemma:3}
   %
 \end{lemma}
 
 \begin{proof}
-    The proof is a direct result from Lemma~2. If we apply the $\widetilde{q}$ stopping rule, Lemma~2 implies that
+    The proof is a direct result from Lemma~2. If we apply the $c$ stopping rule, Lemma~2 implies that
     \begin{eqnarray}
-        Pr\left\{ \widehat{q}_i^k \leqslant \widetilde{q}^k,\forall i\leqslant p_1 \mbox{ and } \widehat{q}_j^k > \widetilde{q}^k,\forall j>p_1 \right\} \leqslant \eta/K.
+        Pr\left\{ \widehat{q}_i^k \leqslant c^k,\forall i\leqslant p_1 \mbox{ and } \widehat{q}_j^k > c^k,\forall j>p_1 \right\} \leqslant \eta/K.
     \end{eqnarray}
     Since, for multiple events $A_i$, $Pr\left\{ \cap_i A_i\right\} \leqslant \sum_i Pr\left\{ A_i\right\}$, we have
     \begin{eqnarray}
-        Pr\left\{ \sum_{k=1}^K \widehat{q}_i^k \leqslant \sum_{k=1}^K \widetilde{q}^k,\forall i\leqslant p_1 \mbox{ and } \sum_{k=1}^K  \widehat{q}_j^k > \sum_{k=1}^K \widetilde{q}^k,\forall j>p_1 \right\} \leqslant \eta.
+        Pr\left\{ \sum_{k=1}^K \widehat{q}_i^k \leqslant \sum_{k=1}^K c^k,\forall i\leqslant p_1 \mbox{ and } \sum_{k=1}^K  \widehat{q}_j^k > \sum_{k=1}^K c^k,\forall j>p_1 \right\} \leqslant \eta.
     \end{eqnarray}
-    Since, $\widehat{q}_i = \frac{1}{K}\sum\widehat{q}_{i}^{k}$ and $\widetilde{q}^{\,*} = \frac{1}{K}\sum\widetilde{q}^k$, we have
+    Since, $\widehat{q}_i = \frac{1}{K}\sum\widehat{q}_{i}^{k}$ and $c^{*} = \frac{1}{K}\sum c^k$, we have
     \begin{eqnarray}
-        Pr\left\{ \widehat{q}_i \leqslant \widetilde{q}^{\,*},\forall i \leqslant p_1 \mbox{ and } \widehat{q}_j > \widetilde{q}^{\,*},\forall j>p_1 \right\} \leqslant \eta.
+        Pr\left\{ \widehat{q}_i \leqslant c^{\,*},\forall i \leqslant p_1 \mbox{ and } \widehat{q}_j > c^{*},\forall j>p_1 \right\} \leqslant \eta.
     \end{eqnarray}
 \end{proof}
 \noindent
-Lemma~\ref{lemma:3} \hl{direcly implies that, with large probability, you can find a theshold value $\widetilde{q}^*$ on the average $L_0$ path that perfectly seperates the informative from the redundant.}
+Lemma~\ref{lemma:3} irectly implies that, with high probability, you can find a threshold value $c^*$ on the average $L_0$ path that perfectly separates the informative from the redundant variables.
 
 %%%%%%%%%%%% step 3 %%%%%%%%%%%%
 
@@ -1312,49 +1385,66 @@ Based on Lemma~\ref{lemma:3}, Theorem~\ref{thm:1} on variable selection consiste
   \[
       \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right|\geqslant\frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}}
   \]
-  hold with $\eta = \exp\left(-n^s/\log(n)\right)$. Thus, Theorem~\ref{thm:1} follows from Lemma~\ref{lemma:2} and \ref{lemma:3}.
+  hold with $\eta = \exp\left(-n^s/\log(n)\right)$. Thus, Theorem~\ref{thm:1} follows from Lemmas~\ref{lemma:2} and \ref{lemma:3}.
 \end{proof}
 
 
+%%%%%%%%%%%% step 4 %%%% %%%%%%%%
+
+\subsection*{Step 4 : probability of omitting weak signals}
+
+\citet[Theorem 2]{zhang09} shows that, if
+%
+\begin{displaymath}
+  \min_{j\in\overline{F}}\left|\overline{\beta}_{j}\right| < \frac{3\omega}{\rho_{X}\left(\overline{F}\right)\cdot\sqrt{n\left(K-1\right)/K}},
+\end{displaymath}
+%
+the probability of selecting at least one redundant $\mathbf{x}_i$ and the number of omitted weak signals are still bounded by sample size, the sparse eigenvalue condition, and the stopping condition. Using the same procedure as step 1, we can rewrite \citet[Theorem 2]{zhang09} into Lemma~\ref{lemma:4}.
+
+\begin{lemma}
+  %
+  \label{lemma:4}
+  Consider the forward selection algorithm on the $k$th subsample $\left(Y^{k},X^{k}\right)$ with Assumption 1 satisfied. With probability larger than $1-\eta$, if
+  %
+  \begin{equation}
+    %
+    \omega > \frac{1}{1-\mu_X \left( \overline{F} \right)} \sigma\sqrt{ 2 \ln \left( 4p / \eta \right)}
+    %
+  \end{equation}
+  %
+  then when the procedure stops at stage $l$, the following claims are true:
+  %
+  \[
+  \begin{cases}
+    \left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>c^k\right\} \subset \overline{F}\\
+    \left\vert \left\{ \mathbf{x}_{j}:\widehat{q}_{i}^{k}>c^k\right\} -  \overline{F} \right\vert \leqslant 2 \left\vert \left\{ j \in \overline{F} : \left\vert \overline{\beta}_j < \frac{3 \omega}{\rho_{X}\left(\overline{F}\right) \cdot \sqrt{n\left(K-1\right)/K}} \right\vert \}\right\} \right\vert
+  \end{cases}
+  \]
+  %
+  where $F^{\left(l-1\right)}$ is the set of variable selected at stage $l-1$. $\blacksquare$
+  %
+\end{lemma}
+
+Using the same method as Lemma~\ref{lemma:3}, Lemma~\ref{lemma:5} follows from the $\widehat{q}$ stopping assumption, showing that selection errors are strictly restricted by sample size, the sparse eigenvalue condition, and the stopping condition on the average path.
+
+\begin{lemma}
+  Consider the forward selection algorithm on the average $L_{0}$ path with Assumption 1 satisfied. With probability less than $\eta$, if (\ref{eqn:q_hat_stopping}) is satisfied, then
+  \[
+  \begin{cases}
+    \left\{ \mathbf{x}_{j}:\widehat{q}^{k}>c^*\right\} \subset \overline{F}\\
+    \left\vert \left\{ \mathbf{x}_{j}:\widehat{q}^{k}>c^*\right\} -  \overline{F} \right\vert > 2 \left\vert \left\{ j \in \overline{F} : \left\vert \overline{\beta}_j < \frac{3 \omega}{\rho_{X}\left(\overline{F}\right) \cdot \sqrt{n\left(K-1\right)/K}} \right\vert \}\right\} \right\vert
+  \end{cases}
+  \]
+  where $c^* = \frac{1}{K} \sum_k^K c^k / K$ and $c^k = \left(\widetilde{p} + 1 - l^k\right) / \widetilde{p}$.
+  %
+  \label{lemma:5}
+  %
+\end{lemma}
+\clearpage
 \end{appendices}
 
 \end{document}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-\citet{tibshirani2015general} \hl{illustrates his point in a number of large-scale applications. We summarize two of them in Figure}~\ref{fig:intro1} and \ref{fig:intro2}.
-%
-\begin{itemize}
-  %
-  \item With $n = 200, p = 4000$, the top row of Figure~\ref{fig:intro1} \hl{shows that forward selection can achieve competitive mean squared errors to that of group lasso under two different setups for the predictors in group lasso regression: uncorrelated and block correlated. (The curves were averaged over 10 simulations, with standard deviations denoted by dotted lines.) The lower table reports runtimes in seconds (averaged over 10 simulations, with standard deviations in parentheses) for the various algorithms considered, and shows that the stagewise algorithm represents a computationally attractive alternative to the coordinate descent approach and the Frank-Wolfe algorithm.}
-  %
-  \item Figure~\ref{fig:intro2} \hl{compares between fused lasso and forward selection on image denoising. The true underlying $300 \times 200$ image is displayed in the middle of the top row. Over 10 noisy pertubations of this underlying image, with one such example shown in the right plot of the top row, we compare averaged mean squared errors of the exact solutions and stagewise estimates, in the left plot of the top row. Average timings for these methods are given in the bottom table. (Standard deviations are denoted by dotted lines in the error plots, and are in parentheses in the table.) The stagewise estimates have competitive mean squared errors and are fast to compute.}
-  %
-\end{itemize}
-
-\begin{figure}[ht]
-  %
-    \centering
-  %
-    \includegraphics[width=0.66\paperwidth]{intro1.pdf}
-  %
-    \caption{Statistical and computational comparisons between group lasso (coordinate descent) and the forward selection with $n = 200, p = 4000$.}
-  %
-    \label{fig:intro1}
-  %
-\end{figure}
-
-\begin{figure}[ht]
-  %
-    \centering
-  %
-    \includegraphics[width=0.55\paperwidth]{intro2.pdf}
-  %
-    \caption{Statistical and computational comparisons between fused lasso and forward selection on image denoising.}
-  %
-    \label{fig:intro2}
-  %
-\end{figure}
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% 

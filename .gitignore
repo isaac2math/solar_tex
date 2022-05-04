@@ -2,5 +2,6 @@
 **/.DS_Store
 /TeXAux
 *.sh
+*.lyx
 revision_summary.txt
 .DS_Store

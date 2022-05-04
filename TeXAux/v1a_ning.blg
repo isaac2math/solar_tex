@@ -1,49 +1,49 @@
-This is BibTeX, Version 0.99d (TeX Live 2021)
+This is BibTeX, Version 0.99d
 Capacity: max_strings=200000, hash_size=200000, hash_prime=170003
 The top-level auxiliary file: v1a_ning.aux
+Reallocating 'name_of_file' (item size: 1) to 16 items.
 The style file: elsarticle-harv.bst
+Reallocating 'name_of_file' (item size: 1) to 11 items.
 Database file #1: ref/CVrefs.bib
-Reallocated singl_function (elt_size=4) to 100 items from 50.
-Warning--empty journal in draper1966applied
+Reallocating 'singl_function' (item size: 4) to 100 items.
 You've used 39 entries,
             2990 wiz_defined-function locations,
-            859 strings with 11315 characters,
-and the built_in function-call counts, 26374 in all, are:
-= -- 2033
-> -- 982
-< -- 25
-+ -- 393
-- -- 339
-* -- 2849
-:= -- 3809
-add.period$ -- 113
+            860 strings with 11465 characters,
+and the built_in function-call counts, 26671 in all, are:
+= -- 2041
+> -- 1022
+< -- 22
++ -- 406
+- -- 354
+* -- 2905
+:= -- 3852
+add.period$ -- 114
 call.type$ -- 39
-change.case$ -- 302
+change.case$ -- 306
 chr.to.int$ -- 38
-cite$ -- 40
-duplicate$ -- 1966
-empty$ -- 1981
-format.name$ -- 462
-if$ -- 4914
+cite$ -- 39
+duplicate$ -- 1981
+empty$ -- 1994
+format.name$ -- 475
+if$ -- 4967
 int.to.chr$ -- 2
 int.to.str$ -- 1
-missing$ -- 378
-newline$ -- 206
+missing$ -- 384
+newline$ -- 207
 num.names$ -- 156
-pop$ -- 703
+pop$ -- 707
 preamble$ -- 1
-purify$ -- 265
+purify$ -- 270
 quote$ -- 0
-skip$ -- 568
+skip$ -- 570
 stack$ -- 0
-substring$ -- 1326
-swap$ -- 1399
+substring$ -- 1310
+swap$ -- 1426
 text.length$ -- 4
 text.prefix$ -- 0
 top$ -- 0
-type$ -- 345
-warning$ -- 1
-while$ -- 184
+type$ -- 342
+warning$ -- 0
+while$ -- 183
 width$ -- 0
-write$ -- 550
-(There was 1 warning)
+write$ -- 553

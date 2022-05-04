@@ -45,9 +45,13 @@
 \providecommand{\theoremname}{Theorem}
 \numberwithin{theorem}{section}
 
-%highlight
-%\newcommand{\hlgreen}[1]{{\sethlcolor{green} \hl{#1}}}
-%\newcommand{\hlning} [2]{{\sethlcolor{orange}\hl{#1}}}
+\newcommand{\appendixpagenumbering}{
+  \break
+  \pagenumbering{arabic}
+  \renewcommand{\thepage}{\thesection-\arabic{page}}
+}
+
+% highlighting
 \newcommand{\hlgreen}[2][green]{{\sethlcolor{#1}\hl{#2}}}
 \newcommand{\hlning}[2][orange]{{\sethlcolor{#1}\hl{#2}}}
 

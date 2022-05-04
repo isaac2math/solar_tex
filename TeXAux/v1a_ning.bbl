@@ -19,14 +19,6 @@
   conference on Machine learning}, \bibinfo{organization}{ACM}. pp.
   \bibinfo{pages}{33--40}.
 %Type = Article
-\bibitem[{Barber and Cand{\`e}s(2019)}]{barber2019knockoff}
-\bibinfo{author}{Barber, R.F.}, \bibinfo{author}{Cand{\`e}s, E.J.},
-  \bibinfo{year}{2019}.
-\newblock \bibinfo{title}{A knockoff filter for high-dimensional selective
-  inference}.
-\newblock \bibinfo{journal}{The Annals of Statistics} \bibinfo{volume}{47},
-  \bibinfo{pages}{2504--2537}.
-%Type = Article
 \bibitem[{Barut et~al.(2016)Barut, Fan and Verhasselt}]{barut2016conditional}
 \bibinfo{author}{Barut, E.}, \bibinfo{author}{Fan, J.},
   \bibinfo{author}{Verhasselt, A.}, \bibinfo{year}{2016}.
@@ -48,11 +40,6 @@
 \newblock \bibinfo{journal}{Journal of Computational and Graphical Statistics}
   \bibinfo{volume}{26}, \bibinfo{pages}{745--766}.
 %Type = Article
-\bibitem[{Draper and Smith(1966)}]{draper1966applied}
-\bibinfo{author}{Draper, N.}, \bibinfo{author}{Smith, H.},
-  \bibinfo{year}{1966}.
-\newblock \bibinfo{title}{Applied regression analysis new york: Wiley} .
-%Type = Article
 \bibitem[{Efron et~al.(2004)Efron, Hastie, Johnstone and
   Tibshirani}]{efronall04}
 \bibinfo{author}{Efron, B.}, \bibinfo{author}{Hastie, T.},
@@ -61,12 +48,6 @@
 \newblock \bibinfo{title}{Least angle regression}.
 \newblock \bibinfo{journal}{Annals of Statistics} \bibinfo{volume}{32},
   \bibinfo{pages}{407--499}.
-%Type = Inproceedings
-\bibitem[{Efroymson(1966)}]{efroymson1966stepwise}
-\bibinfo{author}{Efroymson, M.}, \bibinfo{year}{1966}.
-\newblock \bibinfo{title}{Stepwise regression--a backward and forward look},
-  in: \bibinfo{booktitle}{Eastern Regional Meetings of the Institute of
-  Mathematical Statistics}, pp. \bibinfo{pages}{27--29}.
 %Type = Article
 \bibitem[{Fan and Lv(2008)}]{fan2008sure}
 \bibinfo{author}{Fan, J.}, \bibinfo{author}{Lv, J.}, \bibinfo{year}{2008}.
@@ -123,6 +104,14 @@
   empirical ranking}.
 \newblock \bibinfo{journal}{The Annals of Statistics} \bibinfo{volume}{37},
   \bibinfo{pages}{3929--3959}.
+%Type = Book
+\bibitem[{Huang et~al.(2014)Huang, Marchetti-Bowick and
+  Tibshirani}]{huang2014stat}
+\bibinfo{author}{Huang, S.}, \bibinfo{author}{Marchetti-Bowick, M.},
+  \bibinfo{author}{Tibshirani, R.}, \bibinfo{year}{2014}.
+\newblock \bibinfo{title}{Summary and discussion of Stability Selection}.
+\newblock \bibinfo{publisher}{Departments of Statistics and Machine Learning,
+  Carnegie Mellon University}.
 %Type = Article
 \bibitem[{Ing and Lai(2011)}]{ing2011stepwise}
 \bibinfo{author}{Ing, C.K.}, \bibinfo{author}{Lai, T.L.}, \bibinfo{year}{2011}.
@@ -158,6 +147,14 @@
 \newblock \bibinfo{title}{A significance test for the lasso}.
 \newblock \bibinfo{journal}{Annals of Statistics} \bibinfo{volume}{42},
   \bibinfo{pages}{413--468}.
+%Type = Inproceedings
+\bibitem[{Mameli et~al.(2017)Mameli, Slanzi and Poli}]{mameli2017estimating}
+\bibinfo{author}{Mameli, V.}, \bibinfo{author}{Slanzi, D.},
+  \bibinfo{author}{Poli, I.}, \bibinfo{year}{2017}.
+\newblock \bibinfo{title}{Estimating high-dimensional regression models with
+  bootstrap group penalties}, in: \bibinfo{booktitle}{Convegno della
+  Societ{\`a} Italiana di Statistica}, \bibinfo{organization}{Springer}. pp.
+  \bibinfo{pages}{469--479}.
 %Type = Article
 \bibitem[{Meinshausen and B{\"u}hlmann(2010)}]{meinshausen2010stability}
 \bibinfo{author}{Meinshausen, N.}, \bibinfo{author}{B{\"u}hlmann, P.},
@@ -244,6 +241,13 @@
 \newblock \bibinfo{title}{A safe screening rule for sparse logistic
   regression}, in: \bibinfo{booktitle}{Advances in neural information
   processing systems}, pp. \bibinfo{pages}{1053--1061}.
+%Type = Article
+\bibitem[{Wang et~al.(2011)Wang, Nan, Rosset and Zhu}]{wang2011random}
+\bibinfo{author}{Wang, S.}, \bibinfo{author}{Nan, B.}, \bibinfo{author}{Rosset,
+  S.}, \bibinfo{author}{Zhu, J.}, \bibinfo{year}{2011}.
+\newblock \bibinfo{title}{Random lasso}.
+\newblock \bibinfo{journal}{The annals of applied statistics}
+  \bibinfo{volume}{5}, \bibinfo{pages}{468}.
 %Type = Article
 \bibitem[{Wasserman and Roeder(2009)}]{wasserman2009high}
 \bibinfo{author}{Wasserman, L.}, \bibinfo{author}{Roeder, K.},
