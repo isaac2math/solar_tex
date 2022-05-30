@@ -1,4 +1,4 @@
-## LaTeX files for paper "Solar: stable and ultrafast variable selection for high dimensional and large-scale data"
+## LaTeX files for paper "Solar: $L_0$ path averaging for fast and accurate variable selection in high-dimensional data"
 
 <br>
 
